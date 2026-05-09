@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@400;600;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :root {
     --bg: #0e1117;
@@ -24,8 +24,9 @@
     --amber: #d97706;
     --amber-bright: #fbbf24;
     --blue: #3b82f6;
-    --mono: 'Space Mono', monospace;
-    --display: 'Barlow Condensed', sans-serif;
+    --mono: 'Inter', system-ui, sans-serif;
+    --display: 'Inter', system-ui, sans-serif;
+    --font-code: 'JetBrains Mono', monospace;
     --radius-sm: 5px;
     --radius: 8px;
     --radius-lg: 14px;
@@ -1599,6 +1600,202 @@
 
   /* ── De tabs with radius ── */
   .de-tab                                             { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TYPOGRAPHY REFRESH — Inter everywhere, JetBrains Mono for data
+     Reduced letter-spacing + bigger minimums = no eye fatigue
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* ── Base ── */
+  body { font-family: 'Inter', system-ui, sans-serif; }
+
+  /* ── Monospaced only where it makes sense: IDs, codes, data ── */
+  .ticket-id, .cli-id, .inv-sku, .hist-entry-id, .cli-order-id,
+  .de-table td, .de-cell-num, .cli-num, .logi-search input,
+  .docs-code, .docs-inline, #war-input, .edit-draft-textarea,
+  .api-modal input, #de-search, #cli-search,
+  .slack-notif-id, .hist-entry-msg {
+    font-family: var(--font-code);
+    font-size: 12px;
+  }
+
+  /* ── Kill excessive letter-spacing — the #1 eye-fatigue cause ── */
+  /* Titles */
+  .war-title          { letter-spacing: 0.05em; font-size: 18px; font-weight: 700; }
+  .dash-title, .de-title, .kpi-panel-title,
+  .cli-title, .docs-title { letter-spacing: 0.04em; font-size: 17px; font-weight: 700; }
+  .panel-header,
+  .ticket-col-header  { letter-spacing: 0.04em; font-size: 13px; font-weight: 600; }
+  .roles-header-title { letter-spacing: 0.04em; font-size: 15px; font-weight: 700; }
+  .slack-header-title { letter-spacing: 0.04em; font-size: 14px; font-weight: 700; }
+  .hist-title         { letter-spacing: 0.04em; font-size: 14px; font-weight: 700; }
+  .logi-header        { letter-spacing: 0.04em; font-size: 12px; font-weight: 600; }
+  .de-title           { letter-spacing: 0.04em; }
+
+  /* Topbar */
+  #topbar .title      { letter-spacing: 0.08em; font-size: 18px; font-weight: 800; }
+  .live-counter       { letter-spacing: 0.02em; font-size: 11px; }
+  .counter-val        { font-size: 13px; font-weight: 600; }
+  .refresh-time       { letter-spacing: 0; font-size: 10px; }
+
+  /* Buttons */
+  .tb-btn             { letter-spacing: 0.02em; font-size: 12px; font-weight: 500; }
+  #war-room-toggle    { letter-spacing: 0.04em; font-size: 12px; font-weight: 600; }
+  .btn-approve, .btn-reject,
+  .btn-primary, .btn-secondary,
+  .btn-edit, .btn-confirm-edit,
+  .btn-cancel-edit    { letter-spacing: 0.02em; font-size: 12px; font-weight: 600; }
+  .alert-action       { letter-spacing: 0.02em; font-size: 12px; font-weight: 600; }
+  .war-chip           { letter-spacing: 0.01em; font-size: 12px; font-weight: 500; }
+  #war-send           { letter-spacing: 0.03em; font-size: 13px; font-weight: 600; }
+  .war-close, .dash-close, .de-close, .kpi-panel-close,
+  .cli-close, .docs-close, .hist-close, .cli-detail-close,
+  .roles-close, .slack-close { letter-spacing: 0.02em; font-size: 12px; font-weight: 500; }
+  .hist-clear         { letter-spacing: 0.02em; font-size: 11px; }
+  .roles-demo-btn     { letter-spacing: 0.03em; font-size: 12px; font-weight: 600; }
+  .role-select-btn    { letter-spacing: 0.02em; font-size: 12px; font-weight: 500; }
+  .de-upload, .de-download { letter-spacing: 0.02em; font-size: 11px; font-weight: 500; }
+  .cli-filter-btn     { letter-spacing: 0.02em; font-size: 12px; font-weight: 500; }
+  .cli-detail-btn     { letter-spacing: 0.02em; font-size: 11px; }
+  .slack-btn-approve, .slack-btn-reject,
+  .slack-btn-open     { letter-spacing: 0.02em; font-size: 11px; font-weight: 600; }
+  .slack-config-bar button { letter-spacing: 0.02em; font-size: 11px; font-weight: 600; }
+  .logi-search button { letter-spacing: 0.02em; font-size: 11px; font-weight: 600; }
+
+  /* Badges & tags */
+  .alert-badge        { letter-spacing: 0.03em; font-size: 11px; font-weight: 600; }
+  .vip-badge          { letter-spacing: 0.02em; font-size: 10px; font-weight: 700; }
+  .inv-tag            { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .ticket-channel     { letter-spacing: 0.01em; font-size: 10px; }
+  .ticket-urgency     { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .resolved-badge     { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .ai-response-label  { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .panel-badge        { letter-spacing: 0.02em; font-size: 11px; font-weight: 500; }
+  .role-badge         { letter-spacing: 0.03em; font-size: 12px; font-weight: 600; }
+  .role-active-badge  { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .kpi-m-status       { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .cli-segment        { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .cli-order-status   { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .hist-entry-action  { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .ship-status        { letter-spacing: 0.02em; font-size: 11px; font-weight: 600; }
+  .docs-tag           { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .docs-inline        { letter-spacing: 0; font-size: 11px; }
+  .slack-notif-status { letter-spacing: 0.02em; font-size: 10px; font-weight: 600; }
+  .section-divider    { letter-spacing: 0.04em; font-size: 11px; font-weight: 600; }
+  .loading-text       { letter-spacing: 0.06em; font-size: 12px; }
+
+  /* Content text — no more monospace for reading */
+  .alert-msg          { font-size: 13px; line-height: 1.6; letter-spacing: 0; }
+  .alert-meta         { font-size: 11px; letter-spacing: 0; }
+  .ticket-msg         { font-size: 13px; line-height: 1.6; letter-spacing: 0; }
+  .ticket-meta        { font-size: 11px; letter-spacing: 0; }
+  .msg-bubble         { font-size: 13px; line-height: 1.65; letter-spacing: 0; }
+  .msg-sender         { font-size: 10px; letter-spacing: 0.03em; font-weight: 600; }
+  .ai-response        { font-size: 12px; line-height: 1.65; letter-spacing: 0; color: var(--text); }
+  .role-desc          { font-size: 12px; line-height: 1.65; letter-spacing: 0; }
+  .role-perm          { font-size: 11px; letter-spacing: 0; }
+  .roles-subtitle     { font-size: 12px; line-height: 1.65; letter-spacing: 0; }
+  .api-modal p        { font-size: 12px; line-height: 1.65; letter-spacing: 0; }
+  .war-stat-label     { font-size: 10px; letter-spacing: 0.02em; }
+  .war-stat-val       { font-size: 20px; font-weight: 700; letter-spacing: 0; }
+  .slack-notif-msg    { font-size: 12px; line-height: 1.6; letter-spacing: 0; }
+  .slack-notif-meta   { font-size: 10px; letter-spacing: 0; }
+  .hist-entry-msg     { font-size: 12px; line-height: 1.5; letter-spacing: 0; }
+  .hist-entry-meta    { font-size: 10px; letter-spacing: 0; }
+  .logi-result        { font-size: 12px; line-height: 1.6; letter-spacing: 0; }
+  .docs-p             { font-size: 14px; line-height: 1.75; letter-spacing: 0; }
+  .docs-lead          { font-size: 15px; line-height: 1.7; letter-spacing: 0; }
+  .docs-step-body     { font-size: 13px; line-height: 1.7; letter-spacing: 0; }
+  .empty-state        { font-size: 12px; letter-spacing: 0; }
+  .slack-empty        { font-size: 12px; letter-spacing: 0; }
+  .hist-empty         { font-size: 12px; letter-spacing: 0; }
+
+  /* KPI & numbers — Inter bold, no letter-spacing */
+  .kpi-value          { letter-spacing: 0; font-weight: 700; }
+  .kpi-label          { letter-spacing: 0.03em; font-size: 11px; font-weight: 500; }
+  .kpi-sub            { font-size: 11px; letter-spacing: 0; }
+  .kpi-m-value        { letter-spacing: 0; font-weight: 800; }
+  .kpi-m-name         { letter-spacing: 0.03em; font-size: 11px; font-weight: 500; }
+  .kpi-m-target       { letter-spacing: 0; font-size: 11px; }
+  .kpi-m-formula      { font-family: var(--font-code); font-size: 10px; letter-spacing: 0; }
+  .kpi-panel-sub      { letter-spacing: 0.02em; font-size: 11px; }
+  .kpi-section-label  { letter-spacing: 0.06em; font-size: 11px; font-weight: 600; }
+  .kpi-last-updated   { letter-spacing: 0; font-size: 10px; }
+  .slack-stat-label   { letter-spacing: 0.02em; font-size: 10px; }
+  .slack-stat-val     { font-size: 22px; font-weight: 700; letter-spacing: 0; }
+  .hist-stat-label    { letter-spacing: 0.02em; font-size: 10px; }
+  .hist-stat-val      { font-size: 22px; font-weight: 700; letter-spacing: 0; }
+
+  /* Inventory */
+  .inv-name           { font-size: 14px; font-weight: 600; letter-spacing: 0; }
+  .inv-sku            { font-size: 11px; letter-spacing: 0; }
+  .inv-stats          { font-size: 11px; letter-spacing: 0; }
+
+  /* Role cards */
+  .role-name          { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
+  .role-icon          { font-size: 20px; }
+
+  /* Docs */
+  .docs-h1            { font-size: 26px; font-weight: 700; letter-spacing: 0; }
+  .docs-h2            { font-size: 17px; font-weight: 700; letter-spacing: 0.01em; }
+  .docs-h3            { font-size: 14px; font-weight: 600; letter-spacing: 0; }
+  .docs-step-num      { font-size: 22px; font-weight: 700; }
+  .docs-nav-section   { letter-spacing: 0.04em; font-size: 10px; font-weight: 600; }
+  .docs-nav-item      { font-size: 13px; letter-spacing: 0; }
+  .docs-toc-item      { font-size: 12px; letter-spacing: 0; }
+
+  /* Data tables */
+  .de-table th, .cli-table th, .docs-table th {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.03em; font-size: 11px; font-weight: 600;
+  }
+  .de-table td, .docs-table td { font-size: 12px; letter-spacing: 0; }
+  .cli-table td { font-size: 12px; letter-spacing: 0; }
+  .de-row-count, .cli-row-count { font-size: 11px; letter-spacing: 0; }
+
+  /* Inputs */
+  #war-input          { font-size: 13px; letter-spacing: 0; }
+  .api-modal input    { font-size: 13px; letter-spacing: 0; }
+  #de-search          { font-size: 13px; letter-spacing: 0; }
+  #cli-search         { font-size: 13px; letter-spacing: 0; }
+  .edit-draft-textarea { font-size: 13px; letter-spacing: 0; line-height: 1.6; }
+  .slack-config-bar input { font-size: 12px; letter-spacing: 0; }
+  .logi-search input  { font-size: 13px; letter-spacing: 0; }
+
+  /* Client detail */
+  .cli-detail-title   { letter-spacing: 0.02em; font-size: 15px; font-weight: 700; }
+  .cli-detail-kpi-label { letter-spacing: 0.02em; font-size: 11px; font-weight: 500; }
+  .cli-detail-kpi-val { font-size: 24px; font-weight: 700; letter-spacing: 0; }
+  .cli-detail-section { letter-spacing: 0.04em; font-size: 10px; font-weight: 600; }
+  .cli-order-id       { font-size: 11px; letter-spacing: 0; }
+  .cli-order-val      { font-size: 14px; font-weight: 700; letter-spacing: 0; }
+  .cli-order-meta     { font-size: 10px; letter-spacing: 0; }
+  .cli-stat-label     { letter-spacing: 0.03em; font-size: 11px; font-weight: 500; }
+  .cli-stat-val       { font-size: 26px; font-weight: 700; letter-spacing: 0; }
+  .cli-sub            { letter-spacing: 0.01em; font-size: 11px; }
+  .cli-ltv            { font-size: 14px; font-weight: 700; letter-spacing: 0; }
+  .cli-email          { font-size: 11px; letter-spacing: 0; }
+  .cli-city           { font-size: 11px; letter-spacing: 0; }
+
+  /* Chart titles */
+  .chart-title        { letter-spacing: 0.04em; font-size: 12px; font-weight: 600; }
+
+  /* Health score */
+  #health-score-label { letter-spacing: 0.04em; font-size: 10px; font-weight: 600; }
+  #health-score-val   { font-size: 20px; font-weight: 700; letter-spacing: 0; }
+
+  /* Logistics */
+  .ship-eta           { font-size: 11px; letter-spacing: 0; }
+  .ship-detail        { font-size: 10px; letter-spacing: 0; }
+  .ship-loading       { font-size: 11px; letter-spacing: 0; }
+
+  /* Stock ticker */
+  .stk-label          { font-size: 10px; letter-spacing: 0.03em; }
+  .stk-num            { font-size: 20px; font-weight: 700; letter-spacing: 0; }
+  .stk-pct            { font-size: 14px; font-weight: 700; letter-spacing: 0; }
+
+  /* War room chips */
+  .war-chip           { text-transform: none; font-weight: 500; }
 </style>
 </head>
 <body>
