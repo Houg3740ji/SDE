@@ -6,6 +6,7 @@
 <title>Scuffers — OPS BRAIN</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -1796,6 +1797,56 @@
 
   /* War room chips */
   .war-chip           { text-transform: none; font-weight: 500; }
+
+  /* ── SHOPIFY STATUS BUTTON ─────────────────────────────────────────── */
+  .tb-shopify         { background: rgba(149,191,71,0.12); color: #95BF47; }
+  .tb-shopify.live    { background: rgba(149,191,71,0.18); }
+  .tb-shopify.err     { background: rgba(248,113,113,0.12); color:var(--red-bright); }
+
+  /* ── STOCK COUNTDOWN BADGE ─────────────────────────────────────────── */
+  .inv-countdown      { display:inline-block; padding:2px 7px; border-radius:var(--radius-sm); font-size:10px; font-weight:700; letter-spacing:0.04em; font-family:var(--font-code); margin-left:6px; }
+  .inv-countdown.green  { background:rgba(52,211,153,0.13); color:var(--green-bright); }
+  .inv-countdown.amber  { background:rgba(251,191,36,0.15); color:var(--amber-bright); }
+  .inv-countdown.red    { background:rgba(248,113,113,0.15); color:var(--red-bright); animation: pulse-badge 1.2s ease-in-out infinite; }
+  @keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  /* ── ALERTA PRODUCTO (return pattern) ────────────────────────────────── */
+  .alerta-producto-banner { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.35); border-radius:var(--radius); padding:10px 14px; margin-bottom:8px; }
+  .alerta-producto-banner .ap-title { font-size:11px; font-weight:700; color:var(--red-bright); letter-spacing:0.08em; margin-bottom:4px; }
+  .alerta-producto-banner .ap-body  { font-size:11px; color:var(--text); }
+  .alerta-producto-banner .ap-meta  { font-size:10px; color:var(--muted); margin-top:3px; }
+
+  /* ── BRIEFING MODAL ────────────────────────────────────────────────── */
+  .briefing-overlay   { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+  .briefing-overlay.hidden { display:none; }
+  .briefing-box       { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px 32px; max-width:560px; width:90%; box-shadow:var(--shadow-lg); }
+  .briefing-header    { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .briefing-icon      { font-size:22px; }
+  .briefing-title     { font-size:13px; font-weight:700; letter-spacing:0.06em; color:var(--green-bright); }
+  .briefing-time      { margin-left:auto; font-size:10px; color:var(--muted); }
+  .briefing-body      { font-size:13px; line-height:1.75; color:var(--text); white-space:pre-wrap; min-height:60px; }
+  .briefing-loading   { color:var(--muted); font-style:italic; font-size:12px; }
+  .briefing-footer    { margin-top:20px; display:flex; justify-content:flex-end; gap:10px; }
+  .briefing-dismiss   { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:7px 20px; font-size:11px; font-weight:600; color:var(--text); cursor:pointer; transition:background .15s; }
+  .briefing-dismiss:hover { background:var(--border); }
+
+  /* ── EUROPE MAP PANEL ──────────────────────────────────────────────── */
+  #map-panel          { position:fixed; top:0; right:0; width:440px; height:100vh; background:var(--surface); border-left:1px solid var(--border); z-index:800; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .3s var(--ease); }
+  #map-panel.open     { transform:translateX(0); }
+  .map-header         { display:flex; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border); gap:10px; }
+  .map-title          { font-size:11px; font-weight:700; letter-spacing:0.08em; color:var(--text); }
+  .map-close          { margin-left:auto; background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:4px 8px; }
+  .map-close:hover    { color:var(--text); }
+  .map-svg-wrap       { flex:1; padding:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .map-svg-wrap svg   { width:100%; height:auto; }
+  .map-city-label     { font-family:var(--font-code); font-size:9px; fill:var(--muted); }
+  .map-legend         { padding:10px 16px; border-top:1px solid var(--border); display:flex; gap:14px; flex-wrap:wrap; }
+  .map-legend-item    { display:flex; align-items:center; gap:5px; font-size:10px; color:var(--muted); }
+  .map-legend-dot     { width:8px; height:8px; border-radius:50%; }
+  .map-city-list      { padding:0 16px 12px; overflow-y:auto; max-height:180px; }
+  .map-city-row       { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:11px; }
+  .map-city-row .mcr-name { flex:1; color:var(--text); }
+  .map-city-row .mcr-count { font-family:var(--font-code); font-weight:700; color:var(--green-bright); }
 </style>
 </head>
 <body>
@@ -1849,6 +1900,8 @@
     <button onclick="openDocs()" class="tb-btn admin-only">📖 DOCS</button>
     <button id="api-key-btn" onclick="openApiSettings()" class="tb-btn tb-api admin-only">⚙ AI ACTIVA</button>
     <button onclick="openSlackPanel()" class="tb-btn tb-slack admin-only" id="slack-btn">🔔 SLACK</button>
+    <button id="shopify-btn" class="tb-btn tb-shopify admin-only" onclick="pollShopifyNow()">🛍 SHOPIFY</button>
+    <button class="tb-btn admin-only" onclick="openMap()">🗺 MAPA</button>
     <div style="margin-left:auto"></div>
     <button id="war-room-toggle" class="admin-only" onclick="toggleWarRoom()">⬛ WAR ROOM</button>
   </div>
@@ -3131,11 +3184,24 @@ function renderInventory() {
     const tagClass = isCritical ? 'tag-critical' : isWarning ? 'tag-warning' : 'tag-ok';
     const tagText = isCritical ? 'CRÍTICO' : isWarning ? 'AVISO' : 'OK';
     const incoming = i.inventory_incoming_units > 0 ? `+${i.inventory_incoming_units} ETA ${i.inventory_incoming_eta ? new Date(i.inventory_incoming_eta).toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'}) : '?'}` : 'SIN REPOSICIÓN';
+    // Stock countdown
+    const str = i.sell_through_rate_last_hour || 0;
+    const avail = i.inventory_available_units || 0;
+    let countdownHtml = '';
+    if (str > 0 && avail > 0) {
+      let hours = avail / (str * avail); // hours until 0 at current rate: 1/str (str is fraction/hour)
+      hours = 1 / str; // hours to sell through current stock at sell-through rate per hour
+      // Adjust for campaign (doubles urgency threshold)
+      const threshold = i.hasCampaign ? 2 : 1;
+      let cdClass = hours > 6 * threshold ? 'green' : hours > 2 * threshold ? 'amber' : 'red';
+      const cdLabel = hours >= 24 ? `${Math.round(hours/24)}d` : `${Math.round(hours)}h`;
+      countdownHtml = `<span class="inv-countdown ${cdClass}">⏱ ${cdLabel}</span>`;
+    }
     return `
       <div class="inv-item">
         <div class="inv-top">
           <div>
-            <div class="inv-sku">${i.sku} ${i.hasCampaign ? '🎯' : ''}</div>
+            <div class="inv-sku">${i.sku} ${i.hasCampaign ? '🎯' : ''}${countdownHtml}</div>
             <div class="inv-name">${i.product_name} · ${i.size}</div>
           </div>
           <span class="inv-tag ${tagClass}">${tagText}</span>
@@ -4319,12 +4385,16 @@ function updateHealthScore() {
   wrap.style.borderColor = borderColor;
 }
 
-// ─── DECISION HISTORIAL ────────────────────────────────────────────────────────
+// ─── DECISION HISTORIAL (Supabase + localStorage) ─────────────────────────────
+const SUPA_URL  = 'https://rdbtunqmagyqbdheutmv.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkYnR1bnFtYWd5cWJkaGV1dG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMzg1ODEsImV4cCI6MjA5MzkxNDU4MX0.jPskoAavrorOazPaBjnkDxoZHF2Lp0U5tWSaSR4j2YY';
+const supaClient = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
+
 let decisionLog = [];
 try { decisionLog = JSON.parse(localStorage.getItem('scuffers_decisions') || '[]'); } catch(e) {}
 
 const _loggedDecisions = new Set();
-function logDecision(ticketId, action) {
+async function logDecision(ticketId, action) {
   const key = `${ticketId}:${action}`;
   if (_loggedDecisions.has(key)) return;
   _loggedDecisions.add(key);
@@ -4340,9 +4410,27 @@ function logDecision(ticketId, action) {
     ltv:      tc && tc.customer ? Math.round(tc.customer.customer_lifetime_value) : 0,
     orderId:  tc ? tc.order_id : '?',
   };
+  // Save to localStorage
   decisionLog.unshift(entry);
   if (decisionLog.length > 200) decisionLog = decisionLog.slice(0, 200);
   try { localStorage.setItem('scuffers_decisions', JSON.stringify(decisionLog)); } catch(e) {}
+  // Save to Supabase
+  if (supaClient) {
+    try {
+      await supaClient.from('decisions').insert({
+        ticket_id: ticketId,
+        action,
+        agent: MODEL.currentRole || 'unknown',
+        comment: entry.message,
+        message: entry.message,
+        channel: entry.channel,
+        urgency: entry.urgency,
+        is_vip:  entry.isVip,
+        ltv:     entry.ltv,
+        order_id: entry.orderId,
+      });
+    } catch(e) {}
+  }
   if (document.getElementById('historial-panel').classList.contains('open')) renderHistorial();
 }
 
@@ -4360,22 +4448,47 @@ function clearHistorial() {
   renderHistorial();
 }
 
-function renderHistorial() {
-  const approved = decisionLog.filter(e => e.action === 'approved').length;
-  const rejected = decisionLog.filter(e => e.action === 'rejected').length;
+async function renderHistorial() {
+  // Try to load from Supabase, fallback to localStorage
+  let log = decisionLog;
+  if (supaClient) {
+    try {
+      const { data } = await supaClient.from('decisions').select('*').order('timestamp', { ascending: false }).limit(200);
+      if (data && data.length) {
+        log = data.map(r => ({
+          ticketId: r.ticket_id,
+          action:   r.action,
+          timestamp: r.timestamp,
+          message:  r.message || r.comment || '?',
+          channel:  r.channel || '?',
+          urgency:  r.urgency || '?',
+          isVip:    r.is_vip || false,
+          ltv:      r.ltv || 0,
+          orderId:  r.order_id || '?',
+        }));
+        decisionLog = log;
+        try { localStorage.setItem('scuffers_decisions', JSON.stringify(log.slice(0,200))); } catch(e) {}
+      }
+    } catch(e) {}
+  }
+
+  const approved = log.filter(e => e.action === 'approved').length;
+  const rejected = log.filter(e => e.action === 'rejected').length;
   document.getElementById('hist-stat-app').textContent   = approved;
   document.getElementById('hist-stat-rej').textContent   = rejected;
-  document.getElementById('hist-stat-total').textContent = decisionLog.length;
+  document.getElementById('hist-stat-total').textContent = log.length;
+  document.getElementById('hist-stat-total').nextElementSibling && (document.getElementById('hist-stat-total').closest('.hist-stats').querySelector('.hist-stat-label:last-child') || {textContent:''});
 
   const list = document.getElementById('hist-list');
-  if (!decisionLog.length) {
+  if (!log.length) {
     list.innerHTML = '<div class="hist-empty">Sin decisiones registradas.<br>Aprueba o rechaza tickets para verlos aquí.</div>';
     return;
   }
 
-  list.innerHTML = decisionLog.map(e => {
+  list.innerHTML = log.map(e => {
     const time = new Date(e.timestamp).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
     const date = new Date(e.timestamp).toLocaleDateString('es', { day:'numeric', month:'short' });
+    const urg = (e.urgency || '?').toUpperCase();
     return `
       <div class="hist-entry ${e.action}">
         <div class="hist-entry-top">
@@ -4385,7 +4498,7 @@ function renderHistorial() {
         </div>
         <div class="hist-entry-msg">"${e.message}"</div>
         <div class="hist-entry-meta">
-          <span>${e.urgency.toUpperCase()}</span>
+          <span>${urg}</span>
           <span>${e.channel}</span>
           ${e.isVip ? `<span style="color:var(--amber-bright)">⭐ VIP ${e.ltv}€</span>` : ''}
         </div>
@@ -4981,9 +5094,284 @@ async function boot() {
     if (dashboardOpen) renderAllCharts();
     if (kpiOpen) renderKPIs();
   }, 30000);
+
+  // Start Shopify poller
+  startShopifyPoller();
+
+  // Show shift briefing after 2s
+  setTimeout(showShiftBriefing, 2000);
 }
 
 boot();
+
+// ─── SHOPIFY LIVE POLLER ──────────────────────────────────────────────────────
+let _shopifyLastUpdated = null;
+let _shopifyPollerTimer = null;
+
+async function pollShopify() {
+  const btn = document.getElementById('shopify-btn');
+  try {
+    const params = _shopifyLastUpdated ? `?updated_at_min=${encodeURIComponent(_shopifyLastUpdated)}` : '';
+    const r = await fetch(`/api/shopify${params}`);
+    const data = await r.json();
+
+    if (!data.configured) {
+      if (btn) { btn.textContent = '🛍 SHOPIFY'; btn.classList.remove('live','err'); }
+      return;
+    }
+    if (data.error) {
+      if (btn) { btn.textContent = '🛍 ERR'; btn.classList.add('err'); btn.classList.remove('live'); }
+      return;
+    }
+
+    const orders = data.orders || [];
+    if (orders.length) {
+      // Merge new orders into DATA.orders (avoid duplicates)
+      const existingIds = new Set(DATA.orders.map(o => o.order_id || o.id));
+      const newOrders = orders.filter(o => !existingIds.has(String(o.id)));
+      if (newOrders.length) {
+        // Normalize Shopify order shape to internal schema
+        const normalized = newOrders.map(o => ({
+          order_id:     `ORD-${o.order_number || o.id}`,
+          customer_id:  o.customer ? String(o.customer.id) : 'unknown',
+          order_status: o.financial_status === 'pending' ? 'payment_review' : 'completed',
+          order_date:   o.created_at,
+          order_total:  parseFloat(o.total_price || 0),
+          _shopify:     true,
+        }));
+        DATA.orders = [...normalized, ...DATA.orders];
+        runAlertEngine();
+        updateTopbarStats();
+        updateHealthScore();
+      }
+      _shopifyLastUpdated = new Date().toISOString();
+    }
+
+    if (btn) {
+      btn.textContent = `🛍 ${orders.length} NUEVOS`;
+      btn.classList.add('live'); btn.classList.remove('err');
+    }
+  } catch(e) {
+    if (btn) { btn.textContent = '🛍 SIN CONEXIÓN'; btn.classList.add('err'); btn.classList.remove('live'); }
+  }
+}
+
+function startShopifyPoller() {
+  pollShopify();
+  _shopifyPollerTimer = setInterval(pollShopify, 30000);
+}
+
+function pollShopifyNow() {
+  clearInterval(_shopifyPollerTimer);
+  pollShopify();
+  _shopifyPollerTimer = setInterval(pollShopify, 30000);
+}
+
+// ─── SHIFT BRIEFING ───────────────────────────────────────────────────────────
+async function showShiftBriefing() {
+  const overlay = document.getElementById('briefing-overlay');
+  const body    = document.getElementById('briefing-body');
+  const timeEl  = document.getElementById('briefing-time');
+  if (!overlay) return;
+
+  const now = new Date();
+  timeEl.textContent = now.toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' }) + ' · ' + now.toLocaleDateString('es', { weekday:'long', day:'numeric', month:'long' });
+
+  overlay.classList.remove('hidden');
+  body.innerHTML = '<span class="briefing-loading">Generando resumen del turno...</span>';
+
+  const critAlerts = MODEL.alertsGenerated.filter(a => a.severity === 'critical').length;
+  const reviewOrds = DATA.orders.filter(o => o.order_status === 'payment_review').length;
+  const vipTickets = DATA.tickets.filter(t => MODEL.byCustomer[t.customer_id] && MODEL.byCustomer[t.customer_id].is_vip).length;
+  const critSku    = DATA.inventory.filter(i => i.inventory_available_units < 5).length;
+  const activeCamp = DATA.campaigns.filter(c => c.status === 'active').length;
+
+  const prompt = `Eres el AI Briefing de Scuffers, marca española de streetwear. Genera un briefing de inicio de turno ULTRA CONCISO: exactamente 5-6 frases directas, sin bullets, sin títulos. Solo texto corrido. Tono operativo, sin florituras.
+
+Datos del turno:
+- Pedidos totales: ${DATA.orders.length} | En payment_review: ${reviewOrds}
+- Tickets abiertos: ${DATA.tickets.length} | VIP urgentes: ${vipTickets}
+- Alertas críticas: ${critAlerts}
+- SKUs con stock crítico (<5 uds): ${critSku}
+- Campañas activas: ${activeCamp}
+
+Empieza directamente con el estado. Sin saludos.`;
+
+  try {
+    const res = await fetch('/api/groq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 200,
+        temperature: 0.5,
+      }),
+    });
+    const d = await res.json();
+    const text = d.choices?.[0]?.message?.content || 'No se pudo generar el briefing.';
+    body.textContent = text;
+  } catch(e) {
+    body.textContent = `${DATA.orders.length} pedidos activos. ${reviewOrds} en revisión de pago. ${vipTickets} tickets VIP urgentes. ${critSku} SKUs en stock crítico. ${activeCamp} campañas corriendo. Revisa alertas críticas primero.`;
+  }
+}
+
+function closeBriefing() {
+  document.getElementById('briefing-overlay').classList.add('hidden');
+}
+
+// ─── RETURN PATTERN DETECTION ─────────────────────────────────────────────────
+const RETURN_KEYWORDS = ['devolución','devolver','talla','grande','pequeño','pequeña','no me queda','no me vale','defecto','roto','mal cosido','descosido','tela','calidad','falla','fallo','error de talla','cambio de talla','queda grande','queda pequeño'];
+
+function detectReturnPatterns() {
+  if (MODEL.currentRole !== 'admin') return [];
+  // Group tickets by SKU/product (via order's items if available, else keyword-based)
+  const skuHits = {};
+
+  DATA.tickets.forEach(t => {
+    const msg = (t.support_ticket_message || '').toLowerCase();
+    const hasReturn = RETURN_KEYWORDS.some(kw => msg.includes(kw));
+    if (!hasReturn) return;
+
+    // Try to find SKU from the order
+    const order = DATA.orders.find(o => o.order_id === t.order_id);
+    const items  = order && order.order_items ? order.order_items : [];
+    if (items.length) {
+      items.forEach(item => {
+        const sku = item.sku || item.product_sku || 'UNKNOWN';
+        skuHits[sku] = skuHits[sku] || { count: 0, tickets: [] };
+        skuHits[sku].count++;
+        skuHits[sku].tickets.push(t.ticket_id);
+      });
+    } else {
+      skuHits['GENERAL'] = skuHits['GENERAL'] || { count: 0, tickets: [] };
+      skuHits['GENERAL'].count++;
+      skuHits['GENERAL'].tickets.push(t.ticket_id);
+    }
+  });
+
+  return Object.entries(skuHits)
+    .filter(([, v]) => v.count >= 3)
+    .map(([sku, v]) => ({ sku, count: v.count, tickets: v.tickets }));
+}
+
+function renderReturnAlerts() {
+  const patterns = detectReturnPatterns();
+  if (!patterns.length) return '';
+  return patterns.map(p => `
+    <div class="alerta-producto-banner">
+      <div class="ap-title">⚠ ALERTA PRODUCTO — PATRÓN DE DEVOLUCIÓN</div>
+      <div class="ap-body">SKU <strong>${p.sku}</strong>: ${p.count} tickets con quejas de talla/calidad</div>
+      <div class="ap-meta">Tickets: ${p.tickets.slice(0,5).join(', ')}${p.tickets.length > 5 ? '...' : ''} · Revisar ficha de producto</div>
+    </div>`).join('');
+}
+
+// Inject return alerts into alerts panel after engine runs
+const _origRunAlertEngine = runAlertEngine;
+function runAlertEngine() {
+  _origRunAlertEngine();
+  const extra = renderReturnAlerts();
+  if (extra) {
+    const container = document.getElementById('alerts-container');
+    if (container && !container.querySelector('.alerta-producto-banner')) {
+      container.insertAdjacentHTML('afterbegin', extra);
+    }
+  }
+}
+
+// ─── EUROPE MAP ───────────────────────────────────────────────────────────────
+const MAP_CITIES = {
+  'Madrid':      { x: 148, y: 310, country: 'ES' },
+  'Barcelona':   { x: 192, y: 285, country: 'ES' },
+  'Valencia':    { x: 173, y: 300, country: 'ES' },
+  'Lisboa':      { x: 112, y: 308, country: 'PT' },
+  'París':       { x: 192, y: 228, country: 'FR' },
+  'Londres':     { x: 183, y: 198, country: 'GB' },
+  'Ámsterdam':   { x: 203, y: 185, country: 'NL' },
+  'Berlín':      { x: 240, y: 185, country: 'DE' },
+  'Roma':        { x: 240, y: 295, country: 'IT' },
+  'Milán':       { x: 218, y: 270, country: 'IT' },
+};
+
+function getCityOrderCounts() {
+  const counts = {};
+  Object.keys(MAP_CITIES).forEach(c => counts[c] = 0);
+  DATA.orders.forEach(o => {
+    const city = o.shipping_city || o.city || '';
+    Object.keys(MAP_CITIES).forEach(c => {
+      if (city.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(city.toLowerCase())) {
+        counts[c]++;
+      }
+    });
+  });
+  // If no real data, use demo counts
+  const total = Object.values(counts).reduce((s,v) => s+v, 0);
+  if (!total) {
+    counts['Madrid'] = 42; counts['Barcelona'] = 31; counts['Valencia'] = 14;
+    counts['París'] = 18; counts['Londres'] = 22; counts['Ámsterdam'] = 9;
+    counts['Berlín'] = 7; counts['Roma'] = 6; counts['Milán'] = 8; counts['Lisboa'] = 5;
+  }
+  return counts;
+}
+
+function openMap() {
+  const panel = document.getElementById('map-panel');
+  panel.classList.add('open');
+  renderMap();
+}
+function closeMap() {
+  document.getElementById('map-panel').classList.remove('open');
+}
+
+function renderMap() {
+  const counts = getCityOrderCounts();
+  const max = Math.max(...Object.values(counts), 1);
+  const critSkus = DATA.inventory.filter(i => i.inventory_available_units < 5).map(i => i.sku);
+  const activeCampCities = new Set();
+  DATA.campaigns.filter(c => c.status === 'active').forEach(c => {
+    if (c.campaign_source && c.campaign_source.includes('madrid')) activeCampCities.add('Madrid');
+    if (c.campaign_source && c.campaign_source.includes('barcelona')) activeCampCities.add('Barcelona');
+  });
+
+  // Europe SVG outline (simplified)
+  const svgWrap = document.getElementById('map-svg-wrap');
+  const dots = Object.entries(MAP_CITIES).map(([city, pos]) => {
+    const count = counts[city] || 0;
+    const r = Math.max(5, Math.min(22, 5 + (count / max) * 17));
+    const hasCamp = activeCampCities.has(city);
+    const hasCrit = critSkus.length > 0 && (city === 'Madrid' || city === 'Barcelona');
+    const color = hasCrit ? 'var(--red-bright)' : hasCamp ? 'var(--amber-bright)' : 'var(--green-bright)';
+    return `
+      <circle cx="${pos.x}" cy="${pos.y}" r="${r}" fill="${color}" opacity="0.22"/>
+      <circle cx="${pos.x}" cy="${pos.y}" r="${Math.max(3,r*0.45)}" fill="${color}" opacity="0.9"/>
+      <text x="${pos.x}" y="${pos.y + r + 11}" text-anchor="middle" class="map-city-label">${city}</text>
+      <text x="${pos.x}" y="${pos.y + r + 21}" text-anchor="middle" class="map-city-label" style="fill:var(--text);font-weight:700">${count}</text>`;
+  }).join('');
+
+  svgWrap.innerHTML = `
+    <svg viewBox="80 150 300 220" xmlns="http://www.w3.org/2000/svg">
+      <!-- Europe simplified background paths -->
+      <path d="M130,160 L160,155 L200,150 L250,155 L300,160 L340,175 L360,200 L355,230 L345,250 L330,270 L310,290 L290,310 L270,330 L250,345 L230,350 L210,345 L190,335 L170,320 L155,310 L140,300 L120,290 L100,280 L90,260 L85,240 L88,215 L95,195 L110,178 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <!-- UK -->
+      <path d="M168,175 L185,170 L195,178 L192,195 L185,205 L175,205 L165,195 L160,183 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+      <!-- Iberian Peninsula -->
+      <path d="M112,268 L130,262 L160,265 L185,270 L195,285 L190,305 L175,320 L155,325 L135,318 L115,305 L105,288 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+      ${dots}
+    </svg>`;
+
+  // City list
+  const sortedCities = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  document.getElementById('map-city-list').innerHTML = sortedCities.map(([city, count]) => {
+    const pos = MAP_CITIES[city];
+    const hasCrit = critSkus.length > 0 && (city === 'Madrid' || city === 'Barcelona');
+    const color = hasCrit ? 'var(--red-bright)' : activeCampCities.has(city) ? 'var(--amber-bright)' : 'var(--green-bright)';
+    return `<div class="map-city-row">
+      <div style="width:8px;height:8px;border-radius:50%;background:${color}"></div>
+      <div class="mcr-name">${city} <span style="color:var(--muted);font-size:10px">${pos.country}</span></div>
+      <div class="mcr-count">${count} pedidos</div>
+    </div>`;
+  }).join('');
+}
 </script>
 
 <!-- HISTORIAL PANEL -->
@@ -5011,6 +5399,37 @@ boot();
     <div class="hist-empty">Sin decisiones registradas.<br>Aprueba o rechaza tickets para verlos aquí.</div>
   </div>
   <button class="hist-clear" onclick="clearHistorial()">🗑 LIMPIAR HISTORIAL</button>
+</div>
+
+<!-- BRIEFING MODAL -->
+<div class="briefing-overlay hidden" id="briefing-overlay">
+  <div class="briefing-box">
+    <div class="briefing-header">
+      <span class="briefing-icon">☀️</span>
+      <span class="briefing-title">BRIEFING DE TURNO</span>
+      <span class="briefing-time" id="briefing-time"></span>
+    </div>
+    <div class="briefing-body" id="briefing-body"><span class="briefing-loading">Generando resumen del turno...</span></div>
+    <div class="briefing-footer">
+      <button class="briefing-dismiss" onclick="closeBriefing()">ENTENDIDO →</button>
+    </div>
+  </div>
+</div>
+
+<!-- EUROPE MAP PANEL -->
+<div id="map-panel">
+  <div class="map-header">
+    <span>🗺</span>
+    <span class="map-title">MAPA DE PEDIDOS — EUROPA</span>
+    <button class="map-close" onclick="closeMap()">✕ CERRAR</button>
+  </div>
+  <div class="map-svg-wrap" id="map-svg-wrap"></div>
+  <div class="map-legend">
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--green-bright)"></div>Activo</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--red-bright)"></div>Stock crítico</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--amber-bright)"></div>Campaña activa</div>
+  </div>
+  <div class="map-city-list" id="map-city-list"></div>
 </div>
 
 <!-- LOGISTICS FLOATING WIDGET -->
