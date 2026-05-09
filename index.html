@@ -2945,11 +2945,11 @@ function renderAlerts(alerts) {
   alerts = visible;
 
   el.innerHTML = alerts.map((a, i) => `
-    <div class="alert-item ${a.severity}">
-      <div><span class="alert-badge ${a.severity}">${a.severity.toUpperCase()}</span></div>
-      <div style="font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:4px">${a.title}</div>
-      <div class="alert-msg">${a.msg}</div>
-      <button class="alert-action ${a.actionColor}" onclick="alertAction('${a.ref}', '${a.severity}')">${a.action} →</button>
+    <div class="alert-item ${esc(a.severity)}">
+      <div><span class="alert-badge ${esc(a.severity)}">${esc(a.severity).toUpperCase()}</span></div>
+      <div style="font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:4px">${esc(a.title)}</div>
+      <div class="alert-msg">${esc(a.msg)}</div>
+      <button class="alert-action ${esc(a.actionColor)}" onclick="alertAction('${esc(a.ref)}', '${esc(a.severity)}')">${esc(a.action)} →</button>
     </div>
   `).join('');
 }
@@ -3093,22 +3093,22 @@ function renderTickets() {
     autoEl.innerHTML = autoTickets.map(t => {
       const showBiz = currentRole !== 'agent';
       const ltv = showBiz && t.customer ? `LTV ${Math.round(t.customer.customer_lifetime_value)}€` : '';
-      const orderId = showBiz ? `${t.ticket_id} · ${t.order_id}` : t.ticket_id;
+      const orderId = showBiz ? `${esc(t.ticket_id)} · ${esc(t.order_id)}` : esc(t.ticket_id);
       return `
-        <div class="ticket-card" id="tc-${t.ticket_id}">
+        <div class="ticket-card" id="tc-${esc(t.ticket_id)}">
           <div class="ticket-top">
             <span class="ticket-id">${orderId}</span>
-            <span class="ticket-urgency urgency-${t.support_ticket_urgency}">${t.support_ticket_urgency.toUpperCase()}</span>
+            <span class="ticket-urgency urgency-${esc(t.support_ticket_urgency)}">${esc(t.support_ticket_urgency).toUpperCase()}</span>
           </div>
-          <div class="ticket-msg">${t.support_ticket_message}</div>
+          <div class="ticket-msg">${esc(t.support_ticket_message)}</div>
           <div class="ticket-meta">
-            <span class="ticket-channel">${t.channel}</span>
-            ${ltv ? `<span style="color:var(--muted);margin-left:8px">${ltv}</span>` : ''}
+            <span class="ticket-channel">${esc(t.channel)}</span>
+            ${ltv ? `<span style="color:var(--muted);margin-left:8px">${esc(ltv)}</span>` : ''}
           </div>
-          ${showBiz ? `<div id="ship-${t.ticket_id}"><span class="ship-loading">cargando envío · · ·</span></div>` : ''}
+          ${showBiz ? `<div id="ship-${esc(t.ticket_id)}"><span class="ship-loading">cargando envío · · ·</span></div>` : ''}
           <div class="ai-response">
             <div class="ai-response-label">✓ RESPUESTA ENVIADA</div>
-            ${t.autoResponse}
+            ${esc(t.autoResponse)}
           </div>
           <div class="resolved-badge">RESUELTO</div>
         </div>
@@ -3132,29 +3132,32 @@ function renderTickets() {
 
     const orderStatus = t.order ? t.order.order_status : '?';
 
+    const tid = esc(t.ticket_id);
+    const oid = esc(t.order_id);
+    const urg = esc(t.support_ticket_urgency);
     return `
-      <div class="ticket-card ${isVip ? 'vip' : ''} ${isUrgent ? 'urgent-card' : ''}" id="tc-${t.ticket_id}">
+      <div class="ticket-card ${isVip ? 'vip' : ''} ${isUrgent ? 'urgent-card' : ''}" id="tc-${tid}">
         <div class="ticket-top">
-          <span class="ticket-id">${t.ticket_id} · ${t.order_id}</span>
+          <span class="ticket-id">${tid} · ${oid}</span>
           ${reasonTag}
         </div>
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
-          <span class="ticket-urgency urgency-${t.support_ticket_urgency}">${t.support_ticket_urgency.toUpperCase()}</span>
-          <span style="font-size:9px;color:var(--muted);padding:1px 6px;background:var(--surface2)">${orderStatus.toUpperCase()}</span>
+          <span class="ticket-urgency urgency-${urg}">${urg.toUpperCase()}</span>
+          <span style="font-size:9px;color:var(--muted);padding:1px 6px;background:var(--surface2)">${esc(orderStatus).toUpperCase()}</span>
         </div>
-        <div class="ticket-msg">${t.support_ticket_message}</div>
+        <div class="ticket-msg">${esc(t.support_ticket_message)}</div>
         <div class="ticket-meta">
-          <span class="ticket-channel">${t.channel}</span>
+          <span class="ticket-channel">${esc(t.channel)}</span>
         </div>
-        <div id="ship-${t.ticket_id}"><span class="ship-loading">cargando envío · · ·</span></div>
-        <div class="ai-response draft" id="draft-${t.ticket_id}">
+        <div id="ship-${tid}"><span class="ship-loading">cargando envío · · ·</span></div>
+        <div class="ai-response draft" id="draft-${tid}">
           <div class="ai-response-label">📝 BORRADOR IA — PENDIENTE APROBACIÓN</div>
-          <div id="draft-text-${t.ticket_id}" class="generating">Generando borrador...</div>
+          <div id="draft-text-${tid}" class="generating">Generando borrador...</div>
         </div>
-        <div class="ticket-actions" id="actions-${t.ticket_id}">
-          <button class="btn-approve" onclick="approveTicket('${t.ticket_id}')">APROBAR Y ENVIAR</button>
-          <button class="btn-edit" onclick="startEditDraft('${t.ticket_id}')">EDITAR</button>
-          <button class="btn-reject" onclick="rejectTicket('${t.ticket_id}')">RECHAZAR</button>
+        <div class="ticket-actions" id="actions-${tid}">
+          <button class="btn-approve" onclick="approveTicket('${tid}')">APROBAR Y ENVIAR</button>
+          <button class="btn-edit" onclick="startEditDraft('${tid}')">EDITAR</button>
+          <button class="btn-reject" onclick="rejectTicket('${tid}')">RECHAZAR</button>
         </div>
       </div>
     `;
@@ -3315,8 +3318,8 @@ function renderInventory() {
       <div class="inv-item">
         <div class="inv-top">
           <div>
-            <div class="inv-sku">${i.sku} ${i.hasCampaign ? '🎯' : ''}${countdownHtml}</div>
-            <div class="inv-name">${i.product_name} · ${i.size}</div>
+            <div class="inv-sku">${esc(i.sku)} ${i.hasCampaign ? '🎯' : ''}${countdownHtml}</div>
+            <div class="inv-name">${esc(i.product_name)} · ${esc(i.size)}</div>
           </div>
           <span class="inv-tag ${tagClass}">${tagText}</span>
         </div>
@@ -3326,7 +3329,7 @@ function renderInventory() {
           <div>STR <span>${Math.round(i.sell_through_rate_last_hour * 100)}%</span></div>
           <div>VIEWS <span>${i.product_page_views_last_hour}</span></div>
         </div>
-        <div style="font-size:9px;color:var(--muted)">${incoming}</div>
+        <div style="font-size:9px;color:var(--muted)">${esc(incoming)}</div>
       </div>
     `;
   }).join('');
@@ -3419,7 +3422,7 @@ function addDOMMessage(role, text) {
   div.innerHTML = `
     <div class="msg-bubble ${role}">
       <div class="msg-sender">${role === 'user' ? 'TÚ' : 'OPS BRAIN AI'}</div>
-      ${text.replace(/\n/g, '<br>')}
+      ${esc(text).replace(/\n/g, '<br>')}
     </div>
   `;
   container.appendChild(div);
@@ -3475,7 +3478,7 @@ async function sendWarRoomMessage() {
     // Replace thinking with real response
     thinkingDiv.querySelector('.msg-bubble').classList.remove('thinking');
     thinkingDiv.querySelector('.msg-bubble').innerHTML =
-      `<div class="msg-sender">OPS BRAIN AI</div>${reply.replace(/\n/g, '<br>')}`;
+      `<div class="msg-sender">OPS BRAIN AI</div>${esc(reply).replace(/\n/g, '<br>')}`;
 
     // Add to clean API history so next turn has correct context
     apiMessages.push({ role: 'assistant', content: reply });
@@ -3959,10 +3962,10 @@ function startEditDraft(ticketId) {
   const editWrap = document.createElement('div');
   editWrap.className = 'edit-draft-wrap'; editWrap.id = `edit-wrap-${ticketId}`;
   editWrap.innerHTML = `
-    <textarea class="edit-draft-textarea" id="edit-ta-${ticketId}">${currentText}</textarea>
+    <textarea class="edit-draft-textarea" id="edit-ta-${esc(ticketId)}">${esc(currentText)}</textarea>
     <div class="edit-draft-actions">
-      <button class="btn-confirm-edit" onclick="confirmEdit('${ticketId}')">✓ CONFIRMAR EDICIÓN</button>
-      <button class="btn-cancel-edit"  onclick="cancelEdit('${ticketId}')">CANCELAR</button>
+      <button class="btn-confirm-edit" onclick="confirmEdit('${esc(ticketId)}')">✓ CONFIRMAR EDICIÓN</button>
+      <button class="btn-cancel-edit"  onclick="cancelEdit('${esc(ticketId)}')">CANCELAR</button>
     </div>`;
   draftEl.appendChild(editWrap);
   document.getElementById(`edit-ta-${ticketId}`).focus();
@@ -4394,24 +4397,25 @@ function renderSlackLog() {
     const slabel = STATUS_LABEL[n.status] || n.status;
     const scls   = STATUS_CLS[n.status]   || '';
 
+    const ntid = esc(n.ticketId);
     return `
-      <div class="slack-notification status-${n.status}" id="slack-notif-${n.ticketId}">
+      <div class="slack-notification status-${esc(n.status)}" id="slack-notif-${ntid}">
         <div class="slack-notif-top">
-          <span class="slack-notif-id">${n.ticketId} · ${t ? t.order_id : ''}</span>
-          <span class="slack-notif-status ${scls}">${slabel}</span>
+          <span class="slack-notif-id">${ntid} · ${t ? esc(t.order_id) : ''}</span>
+          <span class="slack-notif-status ${esc(scls)}">${esc(slabel)}</span>
         </div>
-        <div class="slack-notif-msg">"${msg}"</div>
+        <div class="slack-notif-msg">"${esc(msg)}"</div>
         <div class="slack-notif-meta">
-          <span>${urgency.toUpperCase()}</span>
-          <span>${t ? t.channel : '?'}</span>
+          <span>${esc(urgency).toUpperCase()}</span>
+          <span>${t ? esc(t.channel) : '?'}</span>
           ${isVip ? `<span style="color:var(--amber-bright)">⭐ VIP ${ltv}€</span>` : ''}
-          <span>${sentTime}</span>
+          <span>${esc(sentTime)}</span>
         </div>
         ${showActions ? `
           <div class="slack-notif-actions">
-            <button class="slack-btn-approve" onclick="simulateSlackResponse('${n.ticketId}','approved')">✓ APROBAR</button>
-            <button class="slack-btn-reject"  onclick="simulateSlackResponse('${n.ticketId}','rejected')">✗ RECHAZAR</button>
-            <button class="slack-btn-open" onclick="closeSlackPanel();setTimeout(()=>{const el=document.getElementById('tc-${n.ticketId}');if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},150)">→ VER TICKET</button>
+            <button class="slack-btn-approve" onclick="simulateSlackResponse('${ntid}','approved')">✓ APROBAR</button>
+            <button class="slack-btn-reject"  onclick="simulateSlackResponse('${ntid}','rejected')">✗ RECHAZAR</button>
+            <button class="slack-btn-open" onclick="closeSlackPanel();setTimeout(()=>{const el=document.getElementById('tc-${ntid}');if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},150)">→ VER TICKET</button>
           </div>
         ` : `<div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;padding-top:4px">${n.status === 'approved' ? '✓ APROBADO — RESPUESTA ENVIADA' : '✗ RECHAZADO — PENDIENTE MANUAL'}</div>`}
       </div>`;
@@ -4597,19 +4601,20 @@ async function renderHistorial() {
   list.innerHTML = log.map(e => {
     const time = new Date(e.timestamp).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
     const date = new Date(e.timestamp).toLocaleDateString('es', { day:'numeric', month:'short' });
-    const urg = (e.urgency || '?').toUpperCase();
+    const urg = esc(e.urgency || '?').toUpperCase();
+    const actionCls = e.action === 'approved' ? 'approved' : 'rejected';
     return `
-      <div class="hist-entry ${e.action}">
+      <div class="hist-entry ${actionCls}">
         <div class="hist-entry-top">
-          <span class="hist-entry-id">${e.ticketId} · ${e.orderId}</span>
-          <span class="hist-entry-action ${e.action}">${e.action === 'approved' ? '✓ APROBADO' : '✗ RECHAZADO'}</span>
-          <span class="hist-entry-time">${date} ${time}</span>
+          <span class="hist-entry-id">${esc(e.ticketId)} · ${esc(e.orderId)}</span>
+          <span class="hist-entry-action ${actionCls}">${actionCls === 'approved' ? '✓ APROBADO' : '✗ RECHAZADO'}</span>
+          <span class="hist-entry-time">${esc(date)} ${esc(time)}</span>
         </div>
-        <div class="hist-entry-msg">"${e.message}"</div>
+        <div class="hist-entry-msg">"${esc(e.message)}"</div>
         <div class="hist-entry-meta">
           <span>${urg}</span>
-          <span>${e.channel}</span>
-          ${e.isVip ? `<span style="color:var(--amber-bright)">⭐ VIP ${e.ltv}€</span>` : ''}
+          <span>${esc(e.channel)}</span>
+          ${e.isVip ? `<span style="color:var(--amber-bright)">⭐ VIP ${esc(String(e.ltv))}€</span>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -4706,15 +4711,16 @@ function filterClientes() {
     const emailCls = (c.email_opt_in === true || c.email_opt_in === 'true') ? 'on' : 'off';
     const emailTxt = (c.email_opt_in === true || c.email_opt_in === 'true') ? '✓ SÍ' : '✗ NO';
 
+    const cid = esc(c.customer_id);
     return `<tr>
-      <td><span class="cli-id">${isVip ? '<span class="cli-vip-star">⭐</span>' : ''}${c.customer_id}</span></td>
-      <td><span class="cli-segment ${seg.cls}">${seg.label}</span></td>
+      <td><span class="cli-id">${isVip ? '<span class="cli-vip-star">⭐</span>' : ''}${cid}</span></td>
+      <td><span class="cli-segment ${seg.cls}">${esc(seg.label)}</span></td>
       <td><span class="cli-ltv ${ltvCls}">${ltv.toFixed(2)} €</span></td>
       <td class="cli-num">${ords}</td>
       <td class="cli-num ${retsWarn ? 'cli-returns-warn' : ''}">${rets}${retsWarn ? ' ⚠' : ''}</td>
-      <td class="cli-city">${c.preferred_city || '—'}</td>
+      <td class="cli-city">${esc(c.preferred_city || '—')}</td>
       <td><span class="cli-email ${emailCls}">${emailTxt}</span></td>
-      <td><button class="cli-detail-btn" onclick="openCliDetail('${c.customer_id}')">VER →</button></td>
+      <td><button class="cli-detail-btn" onclick="openCliDetail('${cid}')">VER →</button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">Sin resultados</td></tr>';
 }
@@ -4836,7 +4842,7 @@ async function lookupOrder() {
   }
 
   if (!order && !shipping) {
-    result.innerHTML = `<span class="logi-not-found">Pedido <strong>${orderId}</strong> no encontrado en los datos del drop.</span>`;
+    result.innerHTML = `<span class="logi-not-found">Pedido <strong>${esc(orderId)}</strong> no encontrado en los datos del drop.</span>`;
     return;
   }
 
@@ -4850,11 +4856,11 @@ async function lookupOrder() {
   const isSynthetic = shipping && shipping._synthetic ? '<span style="font-size:9px;color:var(--muted)"> (datos estimados)</span>' : '';
 
   let html = `
-    <div class="logi-field"><strong>Pedido:</strong> ${orderId}</div>
-    ${order ? `<div class="logi-field"><strong>Estado:</strong> ${order.order_status.toUpperCase()}</div>` : ''}
+    <div class="logi-field"><strong>Pedido:</strong> ${esc(orderId)}</div>
+    ${order ? `<div class="logi-field"><strong>Estado:</strong> ${esc(order.order_status).toUpperCase()}</div>` : ''}
     ${customer ? `<div class="logi-field"><strong>Cliente:</strong> ${customer.is_vip ? '⭐ VIP · ' : ''}LTV ${Math.round(customer.customer_lifetime_value)}€</div>` : ''}
-    ${cfg ? `<div class="logi-field"><strong>Logística:</strong> ${cfg.icon} ${cfg.label}${isSynthetic}</div>` : ''}
-    ${eta !== '—' ? `<div class="logi-field"><strong>ETA:</strong> ${eta}</div>` : ''}
+    ${cfg ? `<div class="logi-field"><strong>Logística:</strong> ${esc(cfg.icon)} ${esc(cfg.label)}${isSynthetic}</div>` : ''}
+    ${eta !== '—' ? `<div class="logi-field"><strong>ETA:</strong> ${esc(eta)}</div>` : ''}
     ${shipping ? `<div class="logi-field"><strong>Riesgo retraso:</strong> <span style="color:${riskColor}">${riskPct}%</span></div>` : ''}
     ${shipping && shipping.requires_manual_review ? `<div style="color:var(--amber-bright);font-size:10px;margin-top:4px">⚠ Requiere revisión manual</div>` : ''}
   `;
@@ -4864,9 +4870,9 @@ async function lookupOrder() {
     const resolved = tc && (tc.isAuto || approvalTimestamps[ticket.ticket_id]);
     html += `
       <div class="logi-ticket-alert">
-        🎫 Ticket abierto: <strong>${ticket.ticket_id}</strong><br>
-        "${ticket.support_ticket_message.substring(0, 60)}..."<br>
-        <span style="font-size:9px">${ticket.support_ticket_urgency.toUpperCase()} · ${ticket.channel} · ${resolved ? '✓ RESUELTO' : 'PENDIENTE'}</span>
+        🎫 Ticket abierto: <strong>${esc(ticket.ticket_id)}</strong><br>
+        "${esc(ticket.support_ticket_message.substring(0, 60))}..."<br>
+        <span style="font-size:9px">${esc(ticket.support_ticket_urgency).toUpperCase()} · ${esc(ticket.channel)} · ${resolved ? '✓ RESUELTO' : 'PENDIENTE'}</span>
       </div>`;
   }
 
@@ -5662,6 +5668,17 @@ function _showLiveToast(msg, type = 'green') {
 }
 
 // ─── CONFIG PANEL ─────────────────────────────────────────────────────────────
+// ─── HTML ESCAPE (prevents XSS when inserting external data into innerHTML) ────
+function esc(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Keys stored in localStorage, passed as headers to API endpoints
 
 function _cfgGet(k)    { try { return localStorage.getItem(k) || ''; } catch(e) { return ''; } }

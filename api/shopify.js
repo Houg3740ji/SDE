@@ -1,3 +1,5 @@
+const ALLOWED_RESOURCES = new Set(['orders', 'products', 'fulfillments', 'customers']);
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -11,6 +13,11 @@ export default async function handler(req, res) {
 
   const { resource = 'orders', since_id, updated_at_min } = req.query;
 
+  // Whitelist allowed resources to prevent API surface enumeration
+  if (!ALLOWED_RESOURCES.has(resource)) {
+    return res.status(400).json({ error: `Resource "${resource}" not allowed` });
+  }
+
   const params = new URLSearchParams({
     limit: '50',
     status: 'any',
@@ -19,7 +26,7 @@ export default async function handler(req, res) {
   });
 
   try {
-    const url = `https://${shop}/admin/api/2024-04/${resource}.json?${params}`;
+    const url = `https://${shop}/admin/api/2025-01/${resource}.json?${params}`;
     const r = await fetch(url, {
       headers: {
         'X-Shopify-Access-Token': token,
@@ -28,8 +35,15 @@ export default async function handler(req, res) {
     });
 
     if (!r.ok) {
-      const err = await r.text();
-      return res.status(r.status).json({ configured: true, error: err });
+      let errBody;
+      const ct = r.headers.get('content-type') || '';
+      try {
+        errBody = ct.includes('json') ? await r.json() : { message: await r.text() };
+      } catch {
+        errBody = { message: 'Unknown error' };
+      }
+      const errMsg = errBody?.errors || errBody?.message || JSON.stringify(errBody);
+      return res.status(r.status).json({ configured: true, error: errMsg });
     }
 
     const data = await r.json();

@@ -3,6 +3,15 @@
  * Requires an Instagram Page Access Token (from Meta Developer Console)
  * Pass via x-ig-token header
  */
+
+const IG_API = 'https://graph.facebook.com/v21.0';
+
+function igFetch(path, token, params = '') {
+  return fetch(`${IG_API}${path}${params ? '?' + params : ''}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -14,9 +23,7 @@ export default async function handler(req, res) {
 
   try {
     // 1. Get Instagram Business Account ID
-    const meRes = await fetch(
-      `https://graph.facebook.com/v19.0/me?fields=id,name,instagram_business_account&access_token=${token}`
-    );
+    const meRes = await igFetch('/me', token, 'fields=id,name,instagram_business_account');
     const me = await meRes.json();
 
     if (me.error) {
@@ -38,14 +45,18 @@ export default async function handler(req, res) {
     }
 
     // 2. Fetch recent mentions (comments on posts mentioning the account)
-    const mentionsRes = await fetch(
-      `https://graph.facebook.com/v19.0/${igAccountId}/tags?fields=id,text,timestamp,username,media_type&limit=20&access_token=${token}`
+    const mentionsRes = await igFetch(
+      `/${igAccountId}/tags`,
+      token,
+      'fields=id,text,timestamp,username,media_type&limit=20'
     );
     const mentions = await mentionsRes.json();
 
     // 3. Fetch recent DM conversations
-    const convsRes = await fetch(
-      `https://graph.facebook.com/v19.0/${igAccountId}/conversations?platform=instagram&fields=id,participants,updated_time&limit=10&access_token=${token}`
+    const convsRes = await igFetch(
+      `/${igAccountId}/conversations`,
+      token,
+      'platform=instagram&fields=id,participants,updated_time&limit=10'
     );
     const convs = await convsRes.json();
 
@@ -53,12 +64,14 @@ export default async function handler(req, res) {
 
     // Process mentions as tickets
     (mentions.data || []).forEach(m => {
-      const urgency = /urgent|urgente|asap|devol|broken|roto|help|ayuda/i.test(m.text || '') ? 'high' : 'medium';
+      const text = m.text || '';
+      const urgency = /\b(urgent|urgente|asap|devol|broken|roto|help|ayuda)\b/i.test(text) ? 'high' : 'medium';
+      const orderMatch = text.match(/ORD-\d{4,}|#\d{4,}/);
       tickets.push({
         ticket_id:  `IG-${m.id.slice(-6)}`,
-        order_id:   (m.text?.match(/ORD-\d+|#\d{4,}/)?.[0] || '?'),
+        order_id:   orderMatch ? orderMatch[0] : '?',
         customer_id: m.username || 'ig_user',
-        support_ticket_message: m.text || '(mención sin texto)',
+        support_ticket_message: text.slice(0, 500) || '(mención sin texto)',
         support_ticket_urgency: urgency,
         channel: 'instagram',
         date: m.timestamp,
@@ -68,18 +81,22 @@ export default async function handler(req, res) {
 
     // Process DM conversations as tickets
     for (const conv of (convs.data || []).slice(0, 5)) {
-      const msgsRes = await fetch(
-        `https://graph.facebook.com/v19.0/${conv.id}/messages?fields=message,from,created_time&limit=1&access_token=${token}`
+      const msgsRes = await igFetch(
+        `/${conv.id}/messages`,
+        token,
+        'fields=message,from,created_time&limit=1'
       );
       const msgs = await msgsRes.json();
-      const lastMsg = msgs.data?.[0];
-      if (!lastMsg) continue;
+      if (!msgs.data?.length) continue;
+      const lastMsg = msgs.data[0];
 
+      const message = lastMsg.message || '';
+      const orderMatch = message.match(/ORD-\d{4,}|#\d{4,}/);
       tickets.push({
         ticket_id:  `IGDM-${conv.id.slice(-6)}`,
-        order_id:   (lastMsg.message?.match(/ORD-\d+|#\d{4,}/)?.[0] || '?'),
+        order_id:   orderMatch ? orderMatch[0] : '?',
         customer_id: lastMsg.from?.username || lastMsg.from?.name || 'ig_user',
-        support_ticket_message: lastMsg.message || '(mensaje vacío)',
+        support_ticket_message: message.slice(0, 500) || '(mensaje vacío)',
         support_ticket_urgency: 'medium',
         channel: 'instagram',
         date: lastMsg.created_time,

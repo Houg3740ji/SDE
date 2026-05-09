@@ -22,11 +22,11 @@ export default async function handler(req, res) {
       );
 
       if (!listRes.ok) {
-        const err = await listRes.json();
+        const err = await listRes.json().catch(() => ({}));
         if (listRes.status === 401) {
           return res.status(200).json({ configured: true, error: 'token_expired', tickets: [], message: 'Token expirado — renuévalo en Google Account' });
         }
-        return res.status(200).json({ configured: true, error: err.error?.message, tickets: [] });
+        return res.status(200).json({ configured: true, error: err.error?.message || 'Error fetching emails', tickets: [] });
       }
 
       const list = await listRes.json();
@@ -42,38 +42,44 @@ export default async function handler(req, res) {
       );
 
       const tickets = details.map(msg => {
-        const headers = msg.payload?.headers || [];
+        const headers = Array.isArray(msg.payload?.headers) ? msg.payload.headers : [];
         const subject = headers.find(h => h.name === 'Subject')?.value || '(sin asunto)';
         const from    = headers.find(h => h.name === 'From')?.value    || 'unknown';
         const date    = headers.find(h => h.name === 'Date')?.value    || new Date().toISOString();
 
-        // Extract body text
-        let body = '';
+        // Extract body text with safe base64 decoding
         const extractText = (part) => {
           if (!part) return '';
           if (part.mimeType === 'text/plain' && part.body?.data) {
-            return Buffer.from(part.body.data, 'base64').toString('utf-8');
+            try {
+              return Buffer.from(part.body.data, 'base64').toString('utf-8');
+            } catch {
+              return '';
+            }
           }
-          if (part.parts) return part.parts.map(extractText).join(' ');
+          if (Array.isArray(part.parts)) return part.parts.map(extractText).join(' ');
           return '';
         };
-        body = extractText(msg.payload) || subject;
+        const body = (extractText(msg.payload) || subject).trim();
 
-        // Detect urgency from keywords
-        const urgency = /urgent|urgente|asap|critical|crítico|immediately/i.test(body + subject) ? 'critical'
-                      : /broken|roto|dañado|defecto|error/i.test(body) ? 'high'
-                      : /devolución|devolver|cambio|reembolso/i.test(body) ? 'medium'
+        // Detect urgency with word-boundary matching
+        const urgency = /\b(urgent|urgente|asap|critical|crítico|immediately)\b/i.test(body + subject) ? 'critical'
+                      : /\b(broken|roto|dañado|defecto|error)\b/i.test(body) ? 'high'
+                      : /\b(devolución|devolver|cambio|reembolso)\b/i.test(body) ? 'medium'
                       : 'low';
+
+        // Safely extract order ID (strict format only)
+        const orderMatch = body.match(/\bORD-\d{4,}\b|\b#\d{4,}\b/);
 
         return {
           ticket_id: `EMAIL-${msg.id.slice(-6)}`,
-          order_id:  (body.match(/ORD-\d+|#\d{4,}/)?.[0] || '?'),
-          customer_id: from,
-          support_ticket_message: body.slice(0, 300).trim(),
+          order_id:  orderMatch ? orderMatch[0] : '?',
+          customer_id: from.slice(0, 200),
+          support_ticket_message: body.slice(0, 500),
           support_ticket_urgency: urgency,
           channel: 'email',
-          subject,
-          from,
+          subject: subject.slice(0, 200),
+          from: from.slice(0, 200),
           date,
           _source: 'gmail',
         };
