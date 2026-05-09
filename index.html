@@ -10,22 +10,28 @@
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@400;600;700;900&display=swap');
 
   :root {
-    --bg: #111111;
-    --surface: #1A1A1A;
-    --surface2: #222222;
-    --border: #2A2A2A;
-    --green: #2B7551;
-    --green-bright: #3a9e6d;
-    --green-dim: #1d5238;
-    --text: #FFFFFF;
-    --muted: #888888;
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1e2535;
+    --border: #2a3348;
+    --green: #059669;
+    --green-bright: #34d399;
+    --green-dim: #064e3b;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
     --red: #c0392b;
-    --red-bright: #e74c3c;
-    --amber: #d4840a;
-    --amber-bright: #f39c12;
-    --blue: #2980b9;
+    --red-bright: #f87171;
+    --amber: #d97706;
+    --amber-bright: #fbbf24;
+    --blue: #3b82f6;
     --mono: 'Space Mono', monospace;
     --display: 'Barlow Condensed', sans-serif;
+    --radius-sm: 5px;
+    --radius: 8px;
+    --radius-lg: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
+    --ease: cubic-bezier(0.4,0,0.2,1);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,7 +40,8 @@
     background: var(--bg);
     color: var(--text);
     font-family: var(--mono);
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 1.55;
     overflow-x: hidden;
     min-height: 100vh;
   }
@@ -1470,6 +1477,128 @@
   .os-packed      { background: rgba(41,128,185,0.2);  color: #5dade2; }
   .os-payment_review { background: rgba(243,156,18,0.2); color: var(--amber-bright); }
   .os-delivered   { background: rgba(43,117,81,0.15);  color: #5ddb9a; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     DESIGN REFRESH — Rounded corners, spacing & eye-friendly palette
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* ── Global transition smoothing ── */
+  button, input, textarea, .tb-btn, .role-card, .alert-item,
+  .ticket-card, .kpi-m, .war-chip, .slack-notification,
+  .hist-entry, .cli-detail-kpi, .cli-order-row, .docs-toc-item,
+  .docs-nav-item, .role-badge { transition-timing-function: var(--ease); }
+
+  /* ── Cards & containers ── */
+  .alert-item          { border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+  .alert-item:hover    { box-shadow: var(--shadow); }
+  .ticket-card         { border-radius: var(--radius); padding: 14px; }
+  .ticket-card:hover   { box-shadow: 0 4px 20px rgba(0,0,0,0.45); }
+  .kpi-card            { border-radius: var(--radius); }
+  .kpi-m               { border-radius: var(--radius); transition: box-shadow 0.2s var(--ease); }
+  .kpi-m:hover         { box-shadow: var(--shadow); }
+  .chart-card          { border-radius: var(--radius); }
+  .hist-entry          { border-radius: var(--radius-sm); }
+  .slack-notification  { border-radius: var(--radius-sm); }
+  .ship-row            { border-radius: var(--radius-sm); }
+  .cli-detail-kpi      { border-radius: var(--radius-sm); }
+  .cli-order-row       { border-radius: var(--radius-sm); }
+  .role-card           { border-radius: var(--radius); }
+  .docs-step           { border-radius: var(--radius-sm); }
+  .docs-callout        { border-radius: var(--radius-sm); }
+  .docs-code           { border-radius: var(--radius-sm); }
+  .logi-ticket-alert   { border-radius: var(--radius-sm); }
+  .slack-preview-wrap  { border-radius: var(--radius-sm); }
+  #logistics-box       { border-radius: var(--radius); overflow: hidden; }
+  #health-score        { border-radius: var(--radius-sm); }
+  .panel-badge         { border-radius: var(--radius-sm); }
+  .upload-toast        { border-radius: var(--radius); box-shadow: var(--shadow-lg); }
+
+  /* ── Slide-in panels ── */
+  #roles-panel, #slack-panel, #historial-panel, #cli-detail {
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+
+  /* ── Modals ── */
+  .api-modal { border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+
+  /* ── Buttons ── */
+  .tb-btn, #war-room-toggle                           { border-radius: var(--radius-sm); }
+  .btn-approve, .btn-reject                           { border-radius: var(--radius-sm); }
+  .btn-primary, .btn-secondary                        { border-radius: var(--radius-sm); }
+  .btn-edit, .btn-confirm-edit, .btn-cancel-edit      { border-radius: var(--radius-sm); }
+  .alert-action                                       { border-radius: var(--radius-sm); }
+  .war-chip                                           { border-radius: var(--radius-sm); padding: 6px 14px; }
+  #war-send                                           { border-radius: var(--radius-sm); }
+  .hist-clear                                         { border-radius: var(--radius-sm); }
+  .roles-demo-btn, .role-select-btn                   { border-radius: var(--radius-sm); }
+  .de-upload, .de-download                            { border-radius: var(--radius-sm); }
+  .cli-filter-btn, .cli-detail-btn                    { border-radius: var(--radius-sm); }
+  .slack-btn-approve, .slack-btn-reject, .slack-btn-open { border-radius: var(--radius-sm); }
+  .slack-config-bar button                            { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+  .logi-search button                                 { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+  .war-close, .dash-close, .de-close, .kpi-panel-close,
+  .cli-close, .docs-close, .hist-close, .cli-detail-close,
+  .roles-close, .slack-close                          { border-radius: var(--radius-sm); }
+  .slack-preview-btn                                  { border-radius: var(--radius-sm); }
+  #theme-toggle                                       { border-radius: var(--radius-sm); }
+
+  /* ── Inputs ── */
+  #war-input, .api-modal input, .edit-draft-textarea,
+  #de-search, #cli-search                             { border-radius: var(--radius-sm); }
+  .slack-config-bar input                             { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+  .logi-search input                                  { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+  #war-input:focus, .api-modal input:focus,
+  #de-search:focus, #cli-search:focus                 { box-shadow: 0 0 0 2px rgba(52,211,153,0.18); }
+
+  /* ── Badges & tags ── */
+  .alert-badge, .vip-badge, .ticket-channel, .ticket-urgency,
+  .inv-tag, .resolved-badge, .ai-response-label,
+  .role-badge, .kpi-m-status, .cli-segment, .cli-order-status,
+  .hist-entry-action, .ship-status, .docs-tag, .docs-inline,
+  .slack-notif-status                                 { border-radius: var(--radius-sm); }
+
+  /* ── AI response block ── */
+  .ai-response                                        { border-radius: var(--radius-sm); padding: 10px 12px; }
+
+  /* ── Message bubbles with tail effect ── */
+  .msg-bubble                                         { border-radius: var(--radius); }
+  .msg-bubble.user                                    { border-radius: var(--radius) var(--radius) 4px var(--radius); }
+  .msg-bubble.assistant                               { border-radius: 4px var(--radius) var(--radius) var(--radius); border-left-width: 3px; padding: 12px 16px; }
+
+  /* ── Progress & score bars ── */
+  .inv-score-bar, .ship-risk-bar,
+  .stk-bar-wrap, .loading-bar-wrap                    { border-radius: 100px; overflow: hidden; }
+  .inv-score-fill, .ship-risk-fill,
+  .stk-bar-fill, .loading-bar                         { border-radius: 100px; }
+
+  /* ── Panel spacing ── */
+  .panel-content                                      { padding: 14px 16px; }
+  .panel-header                                       { padding: 15px 18px; }
+
+  /* ── Scrollbar refined ── */
+  ::-webkit-scrollbar                                 { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track                           { background: transparent; }
+  ::-webkit-scrollbar-thumb                           { background: var(--border); border-radius: 100px; }
+  ::-webkit-scrollbar-thumb:hover                     { background: #3d4e6a; }
+
+  /* ── Docs improvements ── */
+  .docs-toc-item                                      { border-radius: var(--radius-sm); }
+  .docs-nav-item                                      { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-right: 8px; }
+  .docs-content                                       { padding: 32px 44px; }
+
+  /* ── Light theme shadow adjustments ── */
+  body.theme-light .ticket-card,
+  body.theme-light .alert-item,
+  body.theme-light .role-card,
+  body.theme-light .kpi-card,
+  body.theme-light .kpi-m,
+  body.theme-light .chart-card                        { box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  body.theme-light .ticket-card:hover                 { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  body.theme-light #logistics-box                     { box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+  body.theme-light .api-modal                         { box-shadow: 0 16px 60px rgba(0,0,0,0.15); }
+
+  /* ── De tabs with radius ── */
+  .de-tab                                             { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
 </style>
 </head>
 <body>
