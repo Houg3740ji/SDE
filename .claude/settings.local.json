@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone *)",
+      "PowerShell(cmd /c \"rmdir /s /q C:\\\\Users\\\\Hugo\\\\Desktop\\\\Scuffers_Automatizaciones\\\\asistente-n8n\\\\node_modules\" 2>&1)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(cmd /c \"rmdir /s /q node_modules\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('scripts',{}\\)\\)\")",
+      "Bash(node dist/index.js --help)",
+      "Bash(node dist/mcp-server.js --help)",
+      "Bash(ls dist/*.js)",
+      "Bash(npm run:*)",
+      "Bash(node dist/index.js)",
+      "Bash(cmd /c \"rmdir /s /q C:\\\\Users\\\\Hugo\\\\Desktop\\\\Scuffers_Automatizaciones\\\\asistente-n8n\\\\.git\")",
+      "Bash(powershell -Command \"Remove-Item -Recurse -Force 'C:\\\\Users\\\\Hugo\\\\Desktop\\\\Scuffers_Automatizaciones\\\\asistente-n8n\\\\.git'\")",
+      "mcp__claude_ai_Vercel__deploy_to_vercel",
+      "Bash(vercel --version)",
+      "Bash(gh --version)",
+      "Bash(npm --version)",
+      "Bash(vercel whoami:*)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"vercel whoami\")",
+      "Bash(printf \"protocol=https\\\\nhost=github.com\\\\n\")",
+      "Bash(git credential:*)",
+      "Bash(grep -v \"^$\")",
+      "Bash(vercel deploy:*)",
+      "Bash(curl -s \"https://lkuutmnykcnbfmbpopcu.functions.supabase.co/api/shipping-status/ORD-10492\" -H \"X-Candidate-Id: SCF-2026-2649\")",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s https://lkuutmnykcnbfmbpopcu.functions.supabase.co/api/shipping-status/__TRACKED_VAR__ -H 'X-Candidate-Id: SCF-2026-2649')"
+    ]
+  }
+}
