@@ -5116,7 +5116,12 @@ async function pollShopify() {
     const data = await r.json();
 
     if (!data.configured) {
-      if (btn) { btn.textContent = '🛍 SHOPIFY'; btn.classList.remove('live','err'); }
+      if (btn) {
+        btn.textContent = '🛍 NO CONFIG';
+        btn.classList.remove('live','err');
+        btn.style.opacity = '0.5';
+        btn.title = 'Añade SHOPIFY_STORE_URL y SHOPIFY_ACCESS_TOKEN en Vercel → Settings → Environment Variables';
+      }
       return;
     }
     if (data.error) {
@@ -5331,29 +5336,69 @@ function renderMap() {
     if (c.campaign_source && c.campaign_source.includes('barcelona')) activeCampCities.add('Barcelona');
   });
 
-  // Europe SVG outline (simplified)
   const svgWrap = document.getElementById('map-svg-wrap');
+
+  // City dots — MAP_CITIES coordinates sit on the same grid as country paths below
   const dots = Object.entries(MAP_CITIES).map(([city, pos]) => {
     const count = counts[city] || 0;
-    const r = Math.max(5, Math.min(22, 5 + (count / max) * 17));
+    const r = Math.max(5, Math.min(20, 5 + (count / max) * 15));
     const hasCamp = activeCampCities.has(city);
     const hasCrit = critSkus.length > 0 && (city === 'Madrid' || city === 'Barcelona');
-    const color = hasCrit ? 'var(--red-bright)' : hasCamp ? 'var(--amber-bright)' : 'var(--green-bright)';
+    const color = hasCrit ? '#f87171' : hasCamp ? '#fbbf24' : '#34d399';
     return `
-      <circle cx="${pos.x}" cy="${pos.y}" r="${r}" fill="${color}" opacity="0.22"/>
-      <circle cx="${pos.x}" cy="${pos.y}" r="${Math.max(3,r*0.45)}" fill="${color}" opacity="0.9"/>
-      <text x="${pos.x}" y="${pos.y + r + 11}" text-anchor="middle" class="map-city-label">${city}</text>
-      <text x="${pos.x}" y="${pos.y + r + 21}" text-anchor="middle" class="map-city-label" style="fill:var(--text);font-weight:700">${count}</text>`;
+      <circle cx="${pos.x}" cy="${pos.y}" r="${r}" fill="${color}" opacity="0.18"/>
+      <circle cx="${pos.x}" cy="${pos.y}" r="${Math.max(3, r * 0.45)}" fill="${color}" opacity="0.95"/>
+      <text x="${pos.x}" y="${pos.y + r + 10}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">${city}</text>
+      <text x="${pos.x}" y="${pos.y + r + 20}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" font-weight="700" fill="#f1f5f9">${count}</text>`;
   }).join('');
 
+  // Country shapes — all coordinates tuned to MAP_CITIES positions above
+  // viewBox: x 80→380, y 90→395
+  const LAND = '#1a2d42';
+  const BORDER = '#2a4a68';
+  const W = '1.5';
+
   svgWrap.innerHTML = `
-    <svg viewBox="80 150 300 220" xmlns="http://www.w3.org/2000/svg">
-      <!-- Europe simplified background paths -->
-      <path d="M130,160 L160,155 L200,150 L250,155 L300,160 L340,175 L360,200 L355,230 L345,250 L330,270 L310,290 L290,310 L270,330 L250,345 L230,350 L210,345 L190,335 L170,320 L155,310 L140,300 L120,290 L100,280 L90,260 L85,240 L88,215 L95,195 L110,178 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-      <!-- UK -->
-      <path d="M168,175 L185,170 L195,178 L192,195 L185,205 L175,205 L165,195 L160,183 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-      <!-- Iberian Peninsula -->
-      <path d="M112,268 L130,262 L160,265 L185,270 L195,285 L190,305 L175,320 L155,325 L135,318 L115,305 L105,288 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+    <svg viewBox="80 90 295 310" xmlns="http://www.w3.org/2000/svg">
+      <rect x="80" y="90" width="295" height="310" fill="#0d1622" rx="6"/>
+
+      <!-- Ireland -->
+      <polygon points="103,195 115,182 125,192 120,210 105,212"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="${W}"/>
+
+      <!-- Great Britain -->
+      <polygon points="125,212 212,192 195,115 148,100 112,130 118,178"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="${W}"/>
+
+      <!-- Iberian Peninsula (Spain + Portugal) -->
+      <polygon points="98,265 200,270 202,292 185,344 138,362 90,350 86,312"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="${W}"/>
+
+      <!-- France -->
+      <polygon points="200,270 235,270 244,212 230,185 175,172 128,196 98,265"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="${W}"/>
+
+      <!-- BeNeLux + Germany -->
+      <polygon points="175,196 210,176 230,185 250,172 270,110 325,116 340,180 305,222 258,218 244,212"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="${W}"/>
+
+      <!-- Italy -->
+      <polygon points="196,268 305,220 350,322 310,364 262,378 226,332 210,286"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="${W}"/>
+
+      <!-- Switzerland (overlap fills gap) -->
+      <polygon points="230,218 258,218 250,240 222,245"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="1"/>
+
+      <!-- Scandinavia (partial, decorative) -->
+      <polygon points="270,110 292,90 318,82 335,98 325,116"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="${W}"/>
+
+      <!-- Denmark -->
+      <polygon points="255,128 270,110 278,118 268,140 252,138"
+               fill="${LAND}" stroke="${BORDER}" stroke-width="1"/>
+
+      <!-- City dots on top -->
       ${dots}
     </svg>`;
 
