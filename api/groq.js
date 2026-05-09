@@ -3,9 +3,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
+  // Accept key from request header (set by frontend from localStorage) or env var
+  const apiKey = req.headers['x-groq-key'] || process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
+    return res.status(200).json({ error: 'no_key', message: 'Groq API key no configurada' });
   }
 
   try {

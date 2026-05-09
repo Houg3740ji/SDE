@@ -1,8 +1,9 @@
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const shop   = process.env.SHOPIFY_STORE_URL;   // e.g. mi-tienda.myshopify.com
-  const token  = process.env.SHOPIFY_ACCESS_TOKEN; // Admin API access token
+  // Accept credentials from request headers (set by frontend) or env vars
+  const shop  = req.headers['x-shopify-url']   || process.env.SHOPIFY_STORE_URL;
+  const token = req.headers['x-shopify-token'] || process.env.SHOPIFY_ACCESS_TOKEN;
 
   if (!shop || !token) {
     return res.status(200).json({ configured: false, orders: [], message: 'Shopify not configured' });
@@ -13,8 +14,8 @@ export default async function handler(req, res) {
   const params = new URLSearchParams({
     limit: '50',
     status: 'any',
-    ...(since_id        ? { since_id }        : {}),
-    ...(updated_at_min  ? { updated_at_min }  : {}),
+    ...(since_id       ? { since_id }       : {}),
+    ...(updated_at_min ? { updated_at_min } : {}),
   });
 
   try {
