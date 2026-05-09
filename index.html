@@ -469,29 +469,6 @@
   }
   .btn-cancel-edit:hover { color: var(--text); border-color: var(--text); }
 
-  /* API SETTINGS */
-  #api-settings {
-    position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.8);
-    display: none; align-items: center; justify-content: center;
-  }
-  #api-settings.active { display: flex; }
-  .api-modal {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 28px 32px; width: 420px; display: flex; flex-direction: column; gap: 16px;
-  }
-  .api-modal-title {
-    font-family: var(--display); font-size: 18px; font-weight: 900;
-    letter-spacing: 0.2em; text-transform: uppercase;
-  }
-  .api-modal p { font-size: 11px; color: var(--muted); line-height: 1.6; }
-  .api-modal input {
-    background: var(--bg); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 14px; font-family: var(--mono); font-size: 11px;
-    outline: none; width: 100%; transition: border-color 0.15s;
-    letter-spacing: 0.05em;
-  }
-  .api-modal input:focus { border-color: var(--green); }
-  .api-modal-row { display: flex; gap: 8px; }
   .btn-primary {
     font-family: var(--display); font-size: 12px; font-weight: 900; letter-spacing: 0.15em;
     text-transform: uppercase; padding: 9px 20px; background: var(--green); color: white;
@@ -983,9 +960,6 @@
   body.theme-light .role-perm.no { color: #D1D5DB; }
   body.theme-light .roles-demo-btn { border-color: #A7F3D0; background: rgba(21,128,61,0.05); color: var(--green); }
   body.theme-light .roles-demo-btn:hover { background: rgba(21,128,61,0.1); }
-  /* API modal */
-  body.theme-light #api-settings { background: rgba(15,23,42,0.4); }
-  body.theme-light .api-modal { background: #FFFFFF; border-color: var(--border); }
   /* Dashboard */
   body.theme-light #dashboard { background: var(--bg); }
   body.theme-light .dash-header { background: #FFFFFF; border-bottom-color: var(--border); }
@@ -1520,9 +1494,6 @@
     border-radius: var(--radius-lg) 0 0 var(--radius-lg);
   }
 
-  /* ── Modals ── */
-  .api-modal { border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
-
   /* ── Buttons ── */
   .tb-btn, #war-room-toggle                           { border-radius: var(--radius-sm); }
   .btn-approve, .btn-reject                           { border-radius: var(--radius-sm); }
@@ -1545,12 +1516,11 @@
   #theme-toggle                                       { border-radius: var(--radius-sm); }
 
   /* ── Inputs ── */
-  #war-input, .api-modal input, .edit-draft-textarea,
+  #war-input, .edit-draft-textarea,
   #de-search, #cli-search                             { border-radius: var(--radius-sm); }
   .slack-config-bar input                             { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
   .logi-search input                                  { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
-  #war-input:focus, .api-modal input:focus,
-  #de-search:focus, #cli-search:focus                 { box-shadow: 0 0 0 2px rgba(52,211,153,0.18); }
+  #war-input:focus, #de-search:focus, #cli-search:focus { box-shadow: 0 0 0 2px rgba(52,211,153,0.18); }
 
   /* ── Badges & tags ── */
   .alert-badge, .vip-badge, .ticket-channel, .ticket-urgency,
@@ -1597,8 +1567,6 @@
   body.theme-light .chart-card                        { box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
   body.theme-light .ticket-card:hover                 { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
   body.theme-light #logistics-box                     { box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
-  body.theme-light .api-modal                         { box-shadow: 0 16px 60px rgba(0,0,0,0.15); }
-
   /* ── De tabs with radius ── */
   .de-tab                                             { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
 
@@ -1614,7 +1582,7 @@
   .ticket-id, .cli-id, .inv-sku, .hist-entry-id, .cli-order-id,
   .de-table td, .de-cell-num, .cli-num, .logi-search input,
   .docs-code, .docs-inline, #war-input, .edit-draft-textarea,
-  .api-modal input, #de-search, #cli-search,
+  #de-search, #cli-search,
   .slack-notif-id, .hist-entry-msg {
     font-family: var(--font-code);
     font-size: 12px;
@@ -1696,7 +1664,6 @@
   .role-desc          { font-size: 12px; line-height: 1.65; letter-spacing: 0; }
   .role-perm          { font-size: 11px; letter-spacing: 0; }
   .roles-subtitle     { font-size: 12px; line-height: 1.65; letter-spacing: 0; }
-  .api-modal p        { font-size: 12px; line-height: 1.65; letter-spacing: 0; }
   .war-stat-label     { font-size: 10px; letter-spacing: 0.02em; }
   .war-stat-val       { font-size: 20px; font-weight: 700; letter-spacing: 0; }
   .slack-notif-msg    { font-size: 12px; line-height: 1.6; letter-spacing: 0; }
@@ -1756,7 +1723,6 @@
 
   /* Inputs */
   #war-input          { font-size: 13px; letter-spacing: 0; }
-  .api-modal input    { font-size: 13px; letter-spacing: 0; }
   #de-search          { font-size: 13px; letter-spacing: 0; }
   #cli-search         { font-size: 13px; letter-spacing: 0; }
   .edit-draft-textarea { font-size: 13px; letter-spacing: 0; line-height: 1.6; }
@@ -2757,7 +2723,6 @@ function toggleTheme() {
 const DATA = { inventory: [], tickets: [], orders: [], customers: [], campaigns: [], orderItems: [] };
 const MODEL = { byOrder: {}, byCustomer: {}, bySku: {}, alertsGenerated: [], ticketClassifications: [], shipping: {} };
 const CANDIDATE_ID = 'SCF-2026-2649';
-const GROQ_API_KEY = '';
 let dashboardOpen = false;
 const chartInstances = {};
 let currentRole = 'admin'; // 'admin' | 'cs' | 'agent'
@@ -4565,7 +4530,7 @@ async function logDecision(ticketId, action) {
       await supaClient.from('decisions').insert({
         ticket_id: ticketId,
         action,
-        agent: MODEL.currentRole || 'unknown',
+        agent: currentRole || 'unknown',
         comment: entry.message,
         message: entry.message,
         channel: entry.channel,
@@ -4622,7 +4587,6 @@ async function renderHistorial() {
   document.getElementById('hist-stat-app').textContent   = approved;
   document.getElementById('hist-stat-rej').textContent   = rejected;
   document.getElementById('hist-stat-total').textContent = log.length;
-  document.getElementById('hist-stat-total').nextElementSibling && (document.getElementById('hist-stat-total').closest('.hist-stats').querySelector('.hist-stat-label:last-child') || {textContent:''});
 
   const list = document.getElementById('hist-list');
   if (!log.length) {
@@ -5383,7 +5347,7 @@ function closeBriefing() {
 const RETURN_KEYWORDS = ['devolución','devolver','talla','grande','pequeño','pequeña','no me queda','no me vale','defecto','roto','mal cosido','descosido','tela','calidad','falla','fallo','error de talla','cambio de talla','queda grande','queda pequeño'];
 
 function detectReturnPatterns() {
-  if (MODEL.currentRole !== 'admin') return [];
+  if (currentRole !== 'admin') return [];
   // Group tickets by SKU/product (via order's items if available, else keyword-based)
   const skuHits = {};
 
@@ -5985,7 +5949,7 @@ async function syncInstagramTickets() {
     </div>
     <div style="margin-left:auto;text-align:right">
       <div class="hist-stat-val" id="hist-stat-total" style="color:var(--muted)">0</div>
-      <div class="hist-stat-label">Total sesión + localStorage</div>
+      <div class="hist-stat-label">Total (Supabase)</div>
     </div>
   </div>
   <div class="hist-list" id="hist-list">
