@@ -2695,10 +2695,10 @@ Escribe una respuesta breve (3-4 líneas) que resuelva la preocupación del clie
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch('/api/groq', {
       method: 'POST',
       signal: controller.signal,
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 600,
@@ -2946,10 +2946,10 @@ async function sendWarRoomMessage() {
   const warController = new AbortController();
   const warTimeout = setTimeout(() => warController.abort(), 20000);
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch('/api/groq', {
       method: 'POST',
       signal: warController.signal,
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 1000,
