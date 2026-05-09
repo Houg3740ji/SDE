@@ -5065,7 +5065,7 @@ async function boot() {
   await loadAllData();
   buildModel();
   setLoading(85, 'EJECUTANDO MOTOR DE ALERTAS...');
-  runAlertEngine();
+  runAlertEngine(); injectReturnAlerts();
   setLoading(90, 'CLASIFICANDO TICKETS...');
   classifyAllTickets();
   setLoading(95, 'RENDERIZANDO INTERFAZ...');
@@ -5088,7 +5088,7 @@ async function boot() {
 
   // Refresh loop every 30s
   setInterval(() => {
-    runAlertEngine();
+    runAlertEngine(); injectReturnAlerts();
     updateTopbarStats();
     updateHealthScore();
     if (dashboardOpen) renderAllCharts();
@@ -5266,10 +5266,8 @@ function renderReturnAlerts() {
     </div>`).join('');
 }
 
-// Inject return alerts into alerts panel after engine runs
-const _origRunAlertEngine = runAlertEngine;
-function runAlertEngine() {
-  _origRunAlertEngine();
+// Inject return pattern alerts (called after runAlertEngine)
+function injectReturnAlerts() {
   const extra = renderReturnAlerts();
   if (extra) {
     const container = document.getElementById('alerts-container');
