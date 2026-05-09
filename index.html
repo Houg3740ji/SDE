@@ -237,6 +237,126 @@
     padding: 2px 7px; background: rgba(43,117,81,0.2); color: var(--green-bright); display: inline-block; margin-top: 6px;
   }
 
+  /* ── KEYBOARD FOCUS ──────────────────────────────────────────────────────── */
+  .ticket-card.kb-focus {
+    outline: 2px solid var(--green);
+    outline-offset: -1px;
+    box-shadow: 0 0 0 4px rgba(52,211,153,0.12), 0 0 24px rgba(52,211,153,0.06);
+  }
+
+  /* ── SESSION PROGRESS ────────────────────────────────────────────────────── */
+  .session-progress {
+    display: flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    letter-spacing: 0.06em; flex-shrink: 0;
+  }
+  .session-progress-val {
+    color: var(--green-bright); font-weight: 700; font-size: 13px;
+    display: inline-block; transition: transform 0.15s;
+  }
+  .session-progress-val.pop { animation: counter-pop 0.45s cubic-bezier(0.36,0.07,0.19,0.97) both; }
+  @keyframes counter-pop {
+    0%  { transform: scale(1);   color: var(--green-bright); }
+    35% { transform: scale(1.6); color: #fff; }
+    100%{ transform: scale(1);   color: var(--green-bright); }
+  }
+  .session-bar-wrap { width: 54px; height: 3px; background: var(--surface2); overflow: hidden; }
+  .session-bar-fill { height: 100%; background: var(--green); transition: width 0.5s ease; width: 0%; }
+
+  /* ── MICRO-FEEDBACK BURST ────────────────────────────────────────────────── */
+  .action-burst {
+    position: fixed; pointer-events: none; z-index: 9998;
+    font-family: var(--display); font-size: 15px; font-weight: 900; letter-spacing: 0.12em;
+    white-space: nowrap; transform: translateX(-50%) translateY(-50%);
+    animation: burst-fly 0.65s ease-out forwards;
+  }
+  @keyframes burst-fly {
+    0%   { opacity: 1; transform: translateX(-50%) translateY(-50%) scale(0.8); }
+    30%  { opacity: 1; transform: translateX(-50%) translateY(-80%) scale(1.1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-160%) scale(0.9); }
+  }
+
+  /* ── EMPTY QUEUE STATE ───────────────────────────────────────────────────── */
+  .empty-queue {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 1; padding: 48px 24px; text-align: center; gap: 10px; min-height: 300px;
+  }
+  .empty-queue-glyph {
+    font-size: 28px; opacity: 0.5; margin-bottom: 4px;
+  }
+  .empty-queue-title {
+    font-family: var(--display); font-size: 15px; font-weight: 900;
+    letter-spacing: 0.28em; text-transform: uppercase; color: var(--green-bright);
+  }
+  .empty-queue-sub { font-size: 11px; color: var(--muted); line-height: 1.65; max-width: 200px; }
+  .empty-queue-brand {
+    font-family: var(--display); font-size: 9px; letter-spacing: 0.18em;
+    color: var(--border); text-transform: uppercase; margin-top: 12px;
+  }
+
+  /* ── TICKET CONTEXT ACCORDION ────────────────────────────────────────────── */
+  .ticket-ctx { margin-top: 8px; border-top: 1px solid var(--border); padding-top: 6px; }
+  .ticket-ctx-toggle {
+    background: none; border: none; cursor: pointer; padding: 0;
+    font-family: var(--mono); font-size: 9px; color: var(--muted);
+    letter-spacing: 0.08em; display: flex; align-items: center; gap: 5px;
+    text-transform: uppercase; transition: color 0.15s; width: 100%;
+  }
+  .ticket-ctx-toggle:hover { color: var(--green-bright); }
+  .ctx-arrow { display: inline-block; transition: transform 0.2s; }
+  .ticket-ctx-toggle.open .ctx-arrow { transform: rotate(90deg); }
+  .ticket-ctx-body {
+    max-height: 0; overflow: hidden; transition: max-height 0.28s ease, padding 0.2s;
+    display: flex; flex-direction: column; gap: 3px; padding-top: 0;
+  }
+  .ticket-ctx-body.open { max-height: 200px; padding-top: 8px; }
+  .ctx-row { display: flex; gap: 8px; font-size: 10px; align-items: baseline; }
+  .ctx-label { color: var(--muted); min-width: 54px; letter-spacing: 0.06em; text-transform: uppercase; font-size: 9px; }
+  .ctx-val { color: var(--text); font-weight: 600; }
+
+  /* ── KEYBOARD HINT BAR ───────────────────────────────────────────────────── */
+  #kb-hint-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 400;
+    background: rgba(10,10,10,0.97); border-top: 1px solid var(--border);
+    display: none; align-items: center; gap: 18px; padding: 5px 20px;
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    letter-spacing: 0.05em; backdrop-filter: blur(8px);
+  }
+  #kb-hint-bar.visible { display: flex; }
+  .kb-key {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 16px; padding: 0 5px;
+    background: var(--surface2); border: 1px solid var(--border);
+    font-size: 9px; color: var(--text); border-radius: 2px;
+    letter-spacing: 0; font-family: var(--mono);
+  }
+  .kb-action { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  #kb-hint-bar .kb-sep { color: var(--border); margin: 0 2px; }
+
+  /* ── AGENT QUEUE VIEW ────────────────────────────────────────────────────── */
+  .agent-queue-header {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 16px; border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .agent-queue-title {
+    font-family: var(--display); font-size: 11px; font-weight: 900;
+    letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase;
+  }
+  .agent-queue-stat {
+    font-family: var(--mono); font-size: 22px; font-weight: 700;
+    color: var(--green-bright); letter-spacing: -0.02em;
+  }
+  .agent-queue-sub { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }
+  .agent-progress { width: 100%; height: 2px; background: var(--border); margin-top: 8px; }
+  .agent-progress-fill { height: 100%; background: var(--green); transition: width 0.5s; width: 0%; }
+
+  /* ── LIGHT THEME OVERRIDES ───────────────────────────────────────────────── */
+  body.theme-light .ticket-card.kb-focus { box-shadow: 0 0 0 4px rgba(21,128,61,0.15); }
+  body.theme-light #kb-hint-bar { background: rgba(248,250,252,0.97); border-color: var(--border); }
+  body.theme-light .kb-key { background: #fff; }
+  body.theme-light .empty-queue-glyph { opacity: 0.3; }
+
   /* INVENTORY PANEL */
   .inv-item {
     padding: 10px 12px; border-bottom: 1px solid var(--border);
@@ -1865,6 +1985,12 @@
       <span id="health-score-label">DROP HEALTH</span>
       <span id="health-score-val" style="color:var(--muted)">—</span>
     </div>
+    <div class="topbar-sep"></div>
+    <div class="session-progress" id="session-progress-wrap" title="Tickets gestionados en esta sesión">
+      <span>RESUELTOS</span>
+      <span class="session-progress-val" id="session-resolved">0</span>
+      <div class="session-bar-wrap"><div class="session-bar-fill" id="session-bar"></div></div>
+    </div>
     <div class="topbar-right">
       <span class="live-badge"><span class="live-badge-dot"></span>LIVE · <span id="live-users">1</span> usuario(s)</span>
       <div class="refresh-time" id="refresh-time">ACTUALIZADO —</div>
@@ -1923,10 +2049,18 @@
     </div>
     <div class="tickets-cols">
       <div class="ticket-col">
-        <div class="ticket-col-header">
+        <div class="ticket-col-header" id="auto-col-header">
           <div class="col-dot auto"></div>
           AUTO-RESUELTOS
           <span class="panel-badge" id="auto-count" style="margin-left:auto">0</span>
+        </div>
+        <div id="agent-queue-banner" style="display:none">
+          <div class="agent-queue-header">
+            <div class="agent-queue-title">COLA DE RESPUESTAS</div>
+            <div class="agent-queue-stat" id="agent-auto-count">0</div>
+            <div class="agent-queue-sub">TICKETS PROCESADOS POR IA HOY</div>
+            <div class="agent-progress"><div class="agent-progress-fill" id="agent-prog-fill"></div></div>
+          </div>
         </div>
         <div id="auto-tickets"></div>
       </div>
@@ -3063,9 +3197,10 @@ function classifyAllTickets() {
   }));
   // Queue Slack notifications for HUMANO tickets (only new ones)
   if (typeof queueSlackNotifications === 'function') {
-    // Use setTimeout to let rendering start first
     setTimeout(() => queueSlackNotifications(false), 0);
   }
+  // Sync session total for progress bar
+  setTimeout(syncSessionTotal, 100);
 }
 
 function renderTickets() {
@@ -3082,14 +3217,23 @@ function renderTickets() {
   });
 
   document.getElementById('auto-count').textContent = autoTickets.length;
+  const agentCnt = document.getElementById('agent-auto-count');
+  if (agentCnt) agentCnt.textContent = autoTickets.length;
   document.getElementById('human-count').textContent = humanTickets.length;
   document.getElementById('total-tickets-badge').textContent = DATA.tickets.length;
   document.getElementById('tickets-count').textContent = DATA.tickets.length;
 
   // Render AUTO — simplified for agent role (no business data)
   const autoEl = document.getElementById('auto-tickets');
-  if (!autoTickets.length) { autoEl.innerHTML = '<div class="empty-state">Sin tickets auto-resueltos</div>'; }
-  else {
+  if (!autoTickets.length) {
+    autoEl.innerHTML = `
+      <div class="empty-queue">
+        <div class="empty-queue-glyph">✓</div>
+        <div class="empty-queue-title">Sin pendientes</div>
+        <div class="empty-queue-sub">La IA ha procesado y enviado todas las respuestas automáticas.</div>
+        <div class="empty-queue-brand">As Always, With Love — Scuffers</div>
+      </div>`;
+  } else {
     autoEl.innerHTML = autoTickets.map(t => {
       const showBiz = currentRole !== 'agent';
       const ltv = showBiz && t.customer ? `LTV ${Math.round(t.customer.customer_lifetime_value)}€` : '';
@@ -3118,50 +3262,81 @@ function renderTickets() {
 
   // Render HUMAN
   const humanEl = document.getElementById('human-tickets');
-  humanEl.innerHTML = humanTickets.map(t => {
-    const isVip = t.customer && t.customer.is_vip;
-    const ltv = t.customer ? Math.round(t.customer.customer_lifetime_value) : 0;
-    const isUrgent = t.support_ticket_urgency === 'urgent';
-    const isPaymentReview = t.order && t.order.order_status === 'payment_review';
-    const isAddrChange = t.intent === 'cambio_direccion';
+  if (!humanTickets.length) {
+    humanEl.innerHTML = `
+      <div class="empty-queue">
+        <div class="empty-queue-glyph">⬛</div>
+        <div class="empty-queue-title">Cola vacía</div>
+        <div class="empty-queue-sub">Todos los tickets han sido procesados. El equipo está en sincronía perfecta con la IA.</div>
+        <div class="empty-queue-brand">As Always, With Love — Scuffers</div>
+      </div>`;
+  } else {
+    humanEl.innerHTML = humanTickets.map(t => {
+      const isVip = t.customer && t.customer.is_vip;
+      const ltv = t.customer ? Math.round(t.customer.customer_lifetime_value) : 0;
+      const isUrgent = t.support_ticket_urgency === 'urgent';
+      const isPaymentReview = t.order && t.order.order_status === 'payment_review';
+      const isAddrChange = t.intent === 'cambio_direccion';
 
-    let reasonTag = '';
-    if (isVip) reasonTag = `<span class="vip-badge">VIP ${ltv}€</span>`;
-    else if (isPaymentReview) reasonTag = `<span style="font-family:var(--display);font-size:9px;padding:1px 6px;background:rgba(192,57,43,0.2);color:var(--red-bright)">PAYMENT REVIEW</span>`;
-    else if (isAddrChange) reasonTag = `<span style="font-family:var(--display);font-size:9px;padding:1px 6px;background:rgba(231,76,60,0.15);color:var(--red-bright)">CAMBIO DIRECCIÓN</span>`;
+      let reasonTag = '';
+      if (isVip) reasonTag = `<span class="vip-badge">VIP ${ltv}€</span>`;
+      else if (isPaymentReview) reasonTag = `<span style="font-family:var(--display);font-size:9px;padding:1px 6px;background:rgba(192,57,43,0.2);color:var(--red-bright)">PAYMENT REVIEW</span>`;
+      else if (isAddrChange) reasonTag = `<span style="font-family:var(--display);font-size:9px;padding:1px 6px;background:rgba(231,76,60,0.15);color:var(--red-bright)">CAMBIO DIRECCIÓN</span>`;
 
-    const orderStatus = t.order ? t.order.order_status : '?';
+      const orderStatus = t.order ? t.order.order_status : '?';
+      const tid = esc(t.ticket_id);
+      const oid = esc(t.order_id);
+      const urg = esc(t.support_ticket_urgency);
 
-    const tid = esc(t.ticket_id);
-    const oid = esc(t.order_id);
-    const urg = esc(t.support_ticket_urgency);
-    return `
-      <div class="ticket-card ${isVip ? 'vip' : ''} ${isUrgent ? 'urgent-card' : ''}" id="tc-${tid}">
-        <div class="ticket-top">
-          <span class="ticket-id">${tid} · ${oid}</span>
-          ${reasonTag}
+      // Inline logistics context data
+      const shipping = MODEL.shipping[t.order_id];
+      const shipCfg = shipping ? (SHIP_STATUS_MAP[shipping.shipping_status] || { icon: '📦', label: shipping.shipping_status }) : null;
+      const etaStr = shipping?.estimated_delivery_date
+        ? new Date(shipping.estimated_delivery_date + 'T12:00:00').toLocaleDateString('es', { weekday:'short', day:'numeric', month:'short' })
+        : null;
+      const riskPct = shipping ? Math.round((shipping.delay_risk || 0) * 100) : null;
+      const riskColor = riskPct >= 60 ? 'var(--red-bright)' : riskPct >= 30 ? 'var(--amber-bright)' : 'var(--green-bright)';
+
+      return `
+        <div class="ticket-card ${isVip ? 'vip' : ''} ${isUrgent ? 'urgent-card' : ''}" id="tc-${tid}" onclick="focusTicket('${tid}')" style="cursor:pointer">
+          <div class="ticket-top">
+            <span class="ticket-id">${tid} · ${oid}</span>
+            ${reasonTag}
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+            <span class="ticket-urgency urgency-${urg}">${urg.toUpperCase()}</span>
+            <span style="font-size:9px;color:var(--muted);padding:1px 6px;background:var(--surface2)">${esc(orderStatus).toUpperCase()}</span>
+          </div>
+          <div class="ticket-msg">${esc(t.support_ticket_message)}</div>
+          <div class="ticket-meta">
+            <span class="ticket-channel">${esc(t.channel)}</span>
+          </div>
+          <div class="ai-response draft" id="draft-${tid}">
+            <div class="ai-response-label">📝 BORRADOR IA — PENDIENTE APROBACIÓN</div>
+            <div id="draft-text-${tid}" class="generating">Generando borrador...</div>
+          </div>
+          <div class="ticket-actions" id="actions-${tid}">
+            <button class="btn-approve" onclick="event.stopPropagation();approveTicket('${tid}')">APROBAR Y ENVIAR</button>
+            <button class="btn-edit" onclick="event.stopPropagation();startEditDraft('${tid}')">EDITAR</button>
+            <button class="btn-reject" onclick="event.stopPropagation();rejectTicket('${tid}')">RECHAZAR</button>
+          </div>
+          <div class="ticket-ctx">
+            <button class="ticket-ctx-toggle" id="ctx-toggle-${tid}" onclick="event.stopPropagation();toggleTicketContext('${tid}')">
+              <span class="ctx-arrow">▶</span>&nbsp;PEDIDO &amp; LOGÍSTICA
+            </button>
+            <div class="ticket-ctx-body" id="ctx-body-${tid}">
+              ${t.order ? `<div class="ctx-row"><span class="ctx-label">Estado</span><span class="ctx-val">${esc(orderStatus).toUpperCase()}</span></div>` : ''}
+              ${t.customer ? `<div class="ctx-row"><span class="ctx-label">LTV</span><span class="ctx-val">${ltv}€${isVip ? ' ⭐' : ''}</span></div>` : ''}
+              ${shipCfg ? `<div class="ctx-row"><span class="ctx-label">Envío</span><span class="ctx-val">${esc(shipCfg.icon)} ${esc(shipCfg.label)}</span></div>` : ''}
+              ${etaStr ? `<div class="ctx-row"><span class="ctx-label">ETA</span><span class="ctx-val">${esc(etaStr)}</span></div>` : ''}
+              ${riskPct !== null ? `<div class="ctx-row"><span class="ctx-label">Riesgo</span><span class="ctx-val" style="color:${riskColor}">${riskPct}%</span></div>` : ''}
+              ${!shipCfg ? `<div class="ctx-row"><span style="font-size:9px;color:var(--muted)">Sin datos de envío — usa la consulta logística</span></div>` : ''}
+            </div>
+          </div>
         </div>
-        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
-          <span class="ticket-urgency urgency-${urg}">${urg.toUpperCase()}</span>
-          <span style="font-size:9px;color:var(--muted);padding:1px 6px;background:var(--surface2)">${esc(orderStatus).toUpperCase()}</span>
-        </div>
-        <div class="ticket-msg">${esc(t.support_ticket_message)}</div>
-        <div class="ticket-meta">
-          <span class="ticket-channel">${esc(t.channel)}</span>
-        </div>
-        <div id="ship-${tid}"><span class="ship-loading">cargando envío · · ·</span></div>
-        <div class="ai-response draft" id="draft-${tid}">
-          <div class="ai-response-label">📝 BORRADOR IA — PENDIENTE APROBACIÓN</div>
-          <div id="draft-text-${tid}" class="generating">Generando borrador...</div>
-        </div>
-        <div class="ticket-actions" id="actions-${tid}">
-          <button class="btn-approve" onclick="approveTicket('${tid}')">APROBAR Y ENVIAR</button>
-          <button class="btn-edit" onclick="startEditDraft('${tid}')">EDITAR</button>
-          <button class="btn-reject" onclick="rejectTicket('${tid}')">RECHAZAR</button>
-        </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  }
 
   // Generate AI drafts for human tickets — staggered to respect Groq rate limits
   humanTickets.forEach((t, i) => setTimeout(() => generateDraft(t), i * 400));
@@ -3251,28 +3426,44 @@ function removeTicketCard(ticketId) {
       const auto = parseInt(document.getElementById('auto-count').textContent) || 0;
       document.getElementById('total-tickets-badge').textContent = auto + remaining;
       document.getElementById('tickets-count').textContent = auto + remaining;
+      if (remaining === 0) showEmptyQueue();
+      updateAgentProgressBar();
     }, 320);
   }, 380);
 }
 
 function approveTicket(ticketId) {
-  approvalTimestamps[ticketId] = Date.now(); // track for KPI response time
+  approvalTimestamps[ticketId] = Date.now();
   logDecision(ticketId, 'approved');
   updateHealthScore();
+  showActionBurst(ticketId, 'approved');
+  incrementSessionResolved();
   const actionsEl = document.getElementById(`actions-${ticketId}`);
-  const draftEl = document.getElementById(`draft-${ticketId}`);
-  if (draftEl) { draftEl.style.borderLeftColor = 'var(--green)'; draftEl.querySelector('.ai-response-label').textContent = '✓ ENVIADO'; draftEl.querySelector('.ai-response-label').style.color = 'var(--green-bright)'; }
+  const draftEl   = document.getElementById(`draft-${ticketId}`);
+  if (draftEl) {
+    draftEl.style.borderLeftColor = 'var(--green)';
+    const lbl = draftEl.querySelector('.ai-response-label');
+    if (lbl) { lbl.textContent = '✓ ENVIADO'; lbl.style.color = 'var(--green-bright)'; }
+  }
   if (actionsEl) actionsEl.innerHTML = '<div class="resolved-badge">ENVIADO</div>';
+  if (focusedTicketId === ticketId) { navigateTickets(1); if (focusedTicketId === ticketId) focusTicket(null); }
   setTimeout(() => removeTicketCard(ticketId), 700);
 }
 
 function rejectTicket(ticketId) {
   logDecision(ticketId, 'rejected');
   updateHealthScore();
+  showActionBurst(ticketId, 'rejected');
+  incrementSessionResolved();
   const actionsEl = document.getElementById(`actions-${ticketId}`);
-  const draftEl = document.getElementById(`draft-${ticketId}`);
-  if (draftEl) { draftEl.style.borderLeftColor = 'var(--red)'; draftEl.querySelector('.ai-response-label').textContent = '✗ RECHAZADO — REDACTAR MANUALMENTE'; draftEl.querySelector('.ai-response-label').style.color = 'var(--red-bright)'; }
+  const draftEl   = document.getElementById(`draft-${ticketId}`);
+  if (draftEl) {
+    draftEl.style.borderLeftColor = 'var(--red)';
+    const lbl = draftEl.querySelector('.ai-response-label');
+    if (lbl) { lbl.textContent = '✗ RECHAZADO — REDACTAR MANUALMENTE'; lbl.style.color = 'var(--red-bright)'; }
+  }
   if (actionsEl) actionsEl.innerHTML = '<div style="font-family:var(--display);font-size:9px;color:var(--red-bright);padding:4px 0;letter-spacing:0.1em">ESCALADO A EQUIPO</div>';
+  if (focusedTicketId === ticketId) { navigateTickets(1); if (focusedTicketId === ticketId) focusTicket(null); }
   setTimeout(() => removeTicketCard(ticketId), 1100);
 }
 
@@ -3947,6 +4138,15 @@ function applyRoleVisibility() {
   if (ticketsCols) {
     ticketsCols.style.gridTemplateColumns = cfg.showHumanCol ? '1fr 1fr' : '1fr';
   }
+
+  // Agent-specific UI: show queue banner, hide column header noise
+  const isAgent = currentRole === 'agent';
+  const agentBanner = document.getElementById('agent-queue-banner');
+  const autoColHeader = document.getElementById('auto-col-header');
+  const sessionWrap = document.getElementById('session-progress-wrap');
+  if (agentBanner) agentBanner.style.display = isAgent ? 'block' : 'none';
+  if (autoColHeader) autoColHeader.style.display = isAgent ? 'none' : '';
+  if (sessionWrap) sessionWrap.style.display = isAgent ? 'none' : ''; // agent uses their own banner
 }
 
 // ─── EDIT DRAFT ───────────────────────────────────────────────────────────────
@@ -5679,6 +5879,145 @@ function esc(str) {
     .replace(/'/g, '&#39;');
 }
 
+// ─── UX: SESSION COUNTER ─────────────────────────────────────────────────────
+let sessionResolved = 0;
+let sessionTotal = 0; // total human tickets seen this session
+
+function incrementSessionResolved() {
+  sessionResolved++;
+  const el = document.getElementById('session-resolved');
+  if (el) {
+    el.textContent = sessionResolved;
+    el.classList.remove('pop');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('pop');
+  }
+  // Update progress bar (capped at total human tickets seen)
+  sessionTotal = Math.max(sessionTotal, sessionResolved);
+  const pct = sessionTotal > 0 ? Math.min(100, (sessionResolved / sessionTotal) * 100) : 0;
+  const bar = document.getElementById('session-bar');
+  if (bar) bar.style.width = pct + '%';
+}
+
+function syncSessionTotal() {
+  // Called after tickets are classified — set the session total goal
+  const n = MODEL.ticketClassifications ? MODEL.ticketClassifications.filter(t => !t.isAuto).length : 0;
+  sessionTotal = Math.max(sessionTotal, n);
+}
+
+// ─── UX: MICRO-FEEDBACK BURST ────────────────────────────────────────────────
+function showActionBurst(ticketId, action) {
+  const card = document.getElementById(`tc-${ticketId}`);
+  if (!card) return;
+  const rect = card.getBoundingClientRect();
+  const burst = document.createElement('div');
+  burst.className = 'action-burst';
+  burst.textContent = action === 'approved' ? '✓ ENVIADO' : '✗ RECHAZADO';
+  burst.style.left = (rect.left + rect.width / 2) + 'px';
+  burst.style.top  = (rect.top + rect.height / 2) + 'px';
+  burst.style.color = action === 'approved' ? 'var(--green-bright)' : 'var(--red-bright)';
+  document.body.appendChild(burst);
+  setTimeout(() => burst.remove(), 700);
+}
+
+// ─── UX: EMPTY QUEUE STATE ───────────────────────────────────────────────────
+function showEmptyQueue() {
+  const humanEl = document.getElementById('human-tickets');
+  if (!humanEl) return;
+  humanEl.innerHTML = `
+    <div class="empty-queue">
+      <div class="empty-queue-glyph">⬛</div>
+      <div class="empty-queue-title">Cola vacía</div>
+      <div class="empty-queue-sub">Todos los tickets han sido procesados. El equipo y la IA han sincronizado a la perfección.</div>
+      <div class="empty-queue-brand">As Always, With Love — Scuffers</div>
+    </div>`;
+  focusTicket(null);
+}
+
+// ─── UX: AGENT PROGRESS BAR ──────────────────────────────────────────────────
+function updateAgentProgressBar() {
+  if (currentRole !== 'agent') return;
+  const fill = document.getElementById('agent-prog-fill');
+  if (!fill) return;
+  const pct = sessionTotal > 0 ? Math.min(100, (sessionResolved / sessionTotal) * 100) : 0;
+  fill.style.width = pct + '%';
+}
+
+// ─── UX: TICKET CONTEXT ACCORDION ────────────────────────────────────────────
+function toggleTicketContext(ticketId) {
+  const body   = document.getElementById(`ctx-body-${ticketId}`);
+  const toggle = document.getElementById(`ctx-toggle-${ticketId}`);
+  if (!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (toggle) toggle.classList.toggle('open', !isOpen);
+}
+
+// ─── UX: KEYBOARD NAVIGATION ─────────────────────────────────────────────────
+let focusedTicketId = null;
+
+function getHumanTicketIds() {
+  const el = document.getElementById('human-tickets');
+  if (!el) return [];
+  return Array.from(el.querySelectorAll('.ticket-card[id^="tc-"]')).map(c => c.id.slice(3));
+}
+
+function focusTicket(ticketId) {
+  document.querySelectorAll('.ticket-card.kb-focus').forEach(c => c.classList.remove('kb-focus'));
+  focusedTicketId = ticketId;
+  const hintBar  = document.getElementById('kb-hint-bar');
+  const activeId = document.getElementById('kb-active-id');
+  if (!ticketId) {
+    if (hintBar) hintBar.classList.remove('visible');
+    return;
+  }
+  const card = document.getElementById(`tc-${ticketId}`);
+  if (card) {
+    card.classList.add('kb-focus');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  if (hintBar) hintBar.classList.add('visible');
+  if (activeId) activeId.textContent = ticketId;
+}
+
+function navigateTickets(dir) {
+  const ids = getHumanTicketIds();
+  if (!ids.length) { focusTicket(null); return; }
+  let idx = focusedTicketId ? ids.indexOf(focusedTicketId) : -1;
+  idx = Math.max(0, Math.min(ids.length - 1, idx + dir));
+  focusTicket(ids[idx]);
+}
+
+document.addEventListener('keydown', (e) => {
+  // Skip when user is typing
+  const tag = e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+
+  // Panel-close shortcuts (always active)
+  if (e.key === 'Escape') {
+    if (focusedTicketId) { focusTicket(null); e.preventDefault(); return; }
+    if (document.getElementById('war-room')?.classList.contains('active')) { toggleWarRoom(); e.preventDefault(); return; }
+    if (document.getElementById('dashboard')?.style.display !== 'none') { closeDashboard(); e.preventDefault(); return; }
+    if (document.getElementById('historial-panel')?.classList.contains('open')) { closeHistorial(); e.preventDefault(); return; }
+    return;
+  }
+
+  // Navigation (always active)
+  if (e.key === 'ArrowDown' || e.key === 'j') { e.preventDefault(); navigateTickets(1); return; }
+  if (e.key === 'ArrowUp'   || e.key === 'k') { e.preventDefault(); navigateTickets(-1); return; }
+  if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); navigateTickets(1); return; }
+  if (e.key === 'Tab' &&  e.shiftKey) { e.preventDefault(); navigateTickets(-1); return; }
+
+  // Actions on focused ticket
+  if (focusedTicketId) {
+    const key = e.key.toUpperCase();
+    if (key === 'A' || e.key === 'Enter') { e.preventDefault(); approveTicket(focusedTicketId); return; }
+    if (key === 'R' || e.key === 'Delete') { e.preventDefault(); rejectTicket(focusedTicketId); return; }
+    if (key === 'E') { e.preventDefault(); startEditDraft(focusedTicketId); return; }
+    if (key === 'L') { e.preventDefault(); toggleTicketContext(focusedTicketId); return; }
+  }
+});
+
 // Keys stored in localStorage, passed as headers to API endpoints
 
 function _cfgGet(k)    { try { return localStorage.getItem(k) || ''; } catch(e) { return ''; } }
@@ -6007,6 +6346,21 @@ async function syncInstagramTickets() {
     </div>
   </div>
   <div id="logistics-fab" onclick="toggleLogistics()" title="Consulta logística">📦</div>
+</div>
+
+<!-- KEYBOARD HINT BAR -->
+<div id="kb-hint-bar">
+  <span style="color:var(--green-bright);letter-spacing:0.1em;font-weight:700">TECLADO</span>
+  <span class="kb-sep">·</span>
+  <span class="kb-action"><span class="kb-key">A</span> Aprobar</span>
+  <span class="kb-action"><span class="kb-key">R</span> Rechazar</span>
+  <span class="kb-action"><span class="kb-key">E</span> Editar</span>
+  <span class="kb-action"><span class="kb-key">L</span> Ver logística</span>
+  <span class="kb-sep">·</span>
+  <span class="kb-action"><span class="kb-key">↑</span><span class="kb-key">↓</span> Navegar</span>
+  <span class="kb-action"><span class="kb-key">Tab</span> Siguiente</span>
+  <span class="kb-action"><span class="kb-key">Esc</span> Soltar</span>
+  <span style="margin-left:auto;font-size:9px;color:var(--border)">TICKET ACTIVO: <span id="kb-active-id">—</span></span>
 </div>
 
 </body>
