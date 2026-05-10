@@ -365,10 +365,12 @@
   body.theme-light .empty-queue-glyph { opacity: 0.3; }
 
   /* INVENTORY PANEL */
+  #inventory-container { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
   .inv-item {
-    padding: 10px 12px; border-bottom: 1px solid var(--border);
-    display: flex; flex-direction: column; gap: 5px;
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); display: flex; flex-direction: column; gap: 5px;
   }
+  .inv-item:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.45); }
   .inv-top { display: flex; justify-content: space-between; align-items: center; }
   .inv-sku { font-size: 10px; color: var(--muted); }
   .inv-name { font-family: var(--display); font-size: 13px; font-weight: 700; letter-spacing: 0.05em; }
@@ -1070,7 +1072,7 @@
   body.theme-light .ai-response-label { color: var(--green); }
   body.theme-light .ai-response.draft .ai-response-label { color: var(--amber-bright); }
   /* Inventory */
-  body.theme-light .inv-item { background: #FFFFFF; border-bottom-color: var(--border); }
+  body.theme-light .inv-item { background: #FFFFFF; border-color: var(--border); }
   body.theme-light .inv-score-bar { background: #E5E7EB; }
   /* Edit draft */
   body.theme-light .edit-draft-textarea { background: #F8FAFC; border-color: #93C5FD; color: var(--text); }
