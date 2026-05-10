@@ -3613,8 +3613,8 @@ Escribe una respuesta breve (3-4 líneas) que resuelva la preocupación del clie
       const tc = MODEL.ticketClassifications.find(t => t.ticket_id === ticket.ticket_id);
       if (tc) tc.generatedDraft = text;
     } else {
-      const errMsg = data.error ? data.error.message : 'Sin respuesta de la IA';
-      if (el) { el.classList.remove('generating'); el.textContent = `Error: ${errMsg}`; el.style.color = 'var(--red)'; }
+      const errMsg = data.error ? groqFriendlyError(data) : 'Sin respuesta de la IA';
+      if (el) { el.classList.remove('generating'); el.textContent = errMsg; el.style.color = 'var(--red)'; }
     }
   } catch(e) {
     clearTimeout(timeout);
@@ -3892,7 +3892,7 @@ async function sendWarRoomMessage() {
     const data = await res.json();
     const reply = data.choices && data.choices[0]
       ? data.choices[0].message.content
-      : (data.error ? `Error API: ${data.error.message}` : 'Sin respuesta.');
+      : (data.error ? groqFriendlyError(data) : 'Sin respuesta.');
 
     // Replace thinking with real response
     thinkingDiv.querySelector('.msg-bubble').classList.remove('thinking');
@@ -5901,7 +5901,7 @@ Empieza directamente con el estado. Sin saludos.`;
       }),
     });
     const d = await res.json();
-    const text = d.choices?.[0]?.message?.content || 'No se pudo generar el briefing.';
+    const text = d.choices?.[0]?.message?.content || groqFriendlyError(d) || 'No se pudo generar el briefing.';
     body.textContent = text;
   } catch(e) {
     body.textContent = `${DATA.orders.length} pedidos activos. ${reviewOrds} en revisión de pago. ${vipTickets} tickets VIP urgentes. ${critSku} SKUs en stock crítico. ${activeCamp} campañas corriendo. Revisa alertas críticas primero.`;
@@ -6391,6 +6391,21 @@ function _cfgDel(k)    { try { localStorage.removeItem(k); } catch(e) {} }
 function groqHeaders() {
   const key = _cfgGet('spd_groq_key');
   return key ? { 'x-groq-key': key } : {};
+}
+
+function groqFriendlyError(data) {
+  if (!data || !data.error) return null;
+  const code = data.error.code || '';
+  const msg  = data.error.message || '';
+  if (code === 'rate_limit_exceeded' || msg.includes('Rate limit')) {
+    const m = msg.match(/try again in ([\dms. ]+?)(?:\.|$)/i);
+    const wait = m ? ` Vuelve a intentarlo en ${m[1].trim()}.` : ' Vuelve a intentarlo en unos minutos.';
+    return `⏳ Límite diario de tokens de Groq alcanzado.${wait}`;
+  }
+  if (code === 'invalid_api_key' || msg.toLowerCase().includes('invalid api key')) {
+    return '🔑 API Key de Groq inválida. Revísala en Configuración.';
+  }
+  return `Error: ${msg}`;
 }
 
 // Return extra headers to include when calling /api/shopify
