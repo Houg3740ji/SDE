@@ -75,7 +75,7 @@
   }
   #topbar img { height: 22px; filter: brightness(0) invert(1); flex-shrink: 0; margin-right: 14px; }
   #role-badge { flex-shrink: 0; margin-left: 2px; margin-right: 12px; }
-  .topbar-divider { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; margin: 0 18px; }
+  .topbar-divider { display: none; }
   .live-counter {
     display: flex; align-items: center; gap: 6px;
     font-size: 10px; color: var(--muted); letter-spacing: 0.05em;
@@ -84,7 +84,7 @@
   .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse-dot 2s infinite; flex-shrink: 0; }
   @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
   .counter-val { color: var(--text); font-weight: 700; font-size: 14px; }
-  .live-sep { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; }
+  .live-sep { display: none; }
   .topbar-right { margin-left: auto; display: flex; align-items: center; }
   /* WAR ROOM */
   #war-room-toggle {
@@ -131,14 +131,14 @@
   /* MAIN GRID */
   #main {
     display: grid; grid-template-columns: 300px 1fr 290px;
-    gap: 1px; background: var(--border);
+    gap: 0;
     height: calc(100vh - 83px); overflow: hidden;
   }
   .panel { background: var(--bg); overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: none; }
   .panel::-webkit-scrollbar { display: none; }
   .panel-header {
     position: sticky; top: 0; background: var(--bg); z-index: 10;
-    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
     font-family: var(--display); font-size: 13px; font-weight: 900;
     letter-spacing: 0.2em; text-transform: uppercase;
     display: flex; align-items: center; justify-content: space-between;
@@ -196,14 +196,14 @@
   /* TICKETS */
   #tickets-panel { overflow: hidden; }
   .tickets-cols {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
     flex: 1; overflow: hidden;
   }
   .ticket-col { background: var(--bg); overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: none; }
   .ticket-col::-webkit-scrollbar { display: none; }
   .ticket-col-header {
     position: sticky; top: 0; background: var(--bg); z-index: 5;
-    padding: 10px 12px; border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
     font-family: var(--display); font-size: 12px; font-weight: 900;
     letter-spacing: 0.2em; text-transform: uppercase;
     display: flex; align-items: center; gap: 8px;
@@ -1258,7 +1258,7 @@
   ::-webkit-scrollbar-thumb { background: var(--border); }
 
   /* PANEL HEADER LABEL */
-  #tickets-panel > .panel-header { border-bottom: 1px solid var(--border); }
+  #tickets-panel > .panel-header { border-bottom: none; }
 
   /* ─── HEALTH SCORE ──────────────────────────────────────────────────────── */
   #health-score {
