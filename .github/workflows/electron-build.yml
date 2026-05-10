@@ -3,8 +3,11 @@ name: Build Electron App
 on:
   push:
     tags:
-      - 'v*'          # Trigger on version tags: v1.0.0, v1.1.0, etc.
-  workflow_dispatch:   # Allow manual trigger from GitHub UI
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-windows:
@@ -22,31 +25,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: electron-app/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Windows installer
+      - name: Build and publish Windows installer
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:win
-
-      - name: Upload .exe artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ScuffersOPSBrain-Windows
-          path: |
-            electron-app/dist/*.exe
-            electron-app/dist/latest.yml
-          retention-days: 30
-
-      - name: Publish to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:win -- --publish always
+        run: npx electron-builder --win --publish always
 
   build-mac:
     name: Build macOS (.dmg)
@@ -63,28 +49,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: electron-app/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build macOS DMG
+      - name: Build and publish macOS DMG
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:mac
-
-      - name: Upload .dmg artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ScuffersOPSBrain-macOS
-          path: |
-            electron-app/dist/*.dmg
-            electron-app/dist/latest-mac.yml
-          retention-days: 30
-
-      - name: Publish to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:mac -- --publish always
+        run: npx electron-builder --mac --publish always
