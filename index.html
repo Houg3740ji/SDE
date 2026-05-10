@@ -369,8 +369,15 @@
   .inv-item {
     padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
     background: var(--surface); display: flex; flex-direction: column; gap: 5px;
+    position: relative; overflow: hidden;
   }
   .inv-item:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.45); }
+  .inv-item::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  }
+  .inv-item.critical::before { background: var(--red-bright); }
+  .inv-item.warning::before  { background: var(--amber-bright); }
+  .inv-item.ok::before       { background: var(--green); }
   .inv-top { display: flex; justify-content: space-between; align-items: center; }
   .inv-sku { font-size: 10px; color: var(--muted); }
   .inv-name { font-family: var(--display); font-size: 13px; font-weight: 700; letter-spacing: 0.05em; }
@@ -3665,7 +3672,7 @@ function renderInventory() {
       countdownHtml = `<span class="inv-countdown ${cdClass}">⏱ ${cdLabel}</span>`;
     }
     return `
-      <div class="inv-item">
+      <div class="inv-item ${level}">
         <div class="inv-top">
           <div>
             <div class="inv-sku">${esc(i.sku)} ${i.hasCampaign ? '🎯' : ''}${countdownHtml}</div>
