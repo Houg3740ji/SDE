@@ -1947,6 +1947,72 @@
   .briefing-dismiss   { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:7px 20px; font-size:11px; font-weight:600; color:var(--text); cursor:pointer; transition:background .15s; }
   .briefing-dismiss:hover { background:var(--border); }
 
+  /* ── HERRAMIENTAS DROPDOWN ──────────────────────────────────────────────── */
+  .tools-menu { position: relative; display: flex; align-items: center; }
+  .tools-menu-trigger {
+    font-family: var(--display); font-size: 11px; font-weight: 900; letter-spacing: 0.12em;
+    text-transform: uppercase; padding: 4px 12px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s;
+    white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+  }
+  .tools-menu-trigger:hover,
+  .tools-menu-trigger.open { border-color: var(--green); color: var(--green-bright); }
+  .tools-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 600;
+    background: var(--surface); border: 1px solid var(--border);
+    min-width: 195px; flex-direction: column;
+    padding: 5px; box-shadow: var(--shadow-lg);
+    display: none;
+  }
+  .tools-dropdown.open { display: flex; }
+  .td-item {
+    font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    padding: 8px 12px; background: transparent; border: none; text-align: left;
+    color: var(--muted); cursor: pointer; transition: all 0.12s; white-space: nowrap; width: 100%;
+  }
+  .td-item:hover { background: var(--surface2); color: var(--text); }
+  .td-sep { height: 1px; background: var(--border); margin: 3px 0; }
+  body.theme-light .tools-dropdown { background: #fff; border-color: var(--border); }
+  body.theme-light .td-item:hover { background: #f1f5f9; }
+
+  /* ── PANEL COLLAPSE ──────────────────────────────────────────────────────── */
+  .panel-collapse-btn {
+    background: none; border: none; cursor: pointer; padding: 2px 6px;
+    color: var(--muted); font-size: 10px; font-weight: 900; transition: color 0.15s;
+    flex-shrink: 0; font-family: var(--display); letter-spacing: 0.05em;
+  }
+  .panel-collapse-btn:hover { color: var(--green-bright); }
+  #alerts-panel, #inventory-panel {
+    transition: min-width 0.25s var(--ease);
+  }
+  #alerts-panel.panel-collapsed,
+  #inventory-panel.panel-collapsed { overflow: hidden; min-width: 0; cursor: pointer; }
+  #alerts-panel.panel-collapsed .panel-content,
+  #inventory-panel.panel-collapsed #inventory-container { display: none; }
+  #alerts-panel.panel-collapsed .panel-header,
+  #inventory-panel.panel-collapsed .panel-header {
+    writing-mode: vertical-rl; flex-direction: column; justify-content: flex-start;
+    align-items: center; height: 100%; padding: 14px 6px; border-bottom: none;
+    gap: 10px; cursor: pointer; user-select: none; letter-spacing: 0.15em;
+  }
+  #alerts-panel.panel-collapsed .panel-collapse-btn,
+  #inventory-panel.panel-collapsed .panel-collapse-btn {
+    writing-mode: horizontal-tb; transform: rotate(90deg);
+  }
+  /* Alert panel header urgency tint */
+  #alerts-panel.has-critical .panel-header {
+    border-bottom-color: rgba(248,113,113,0.4);
+    background: rgba(248,113,113,0.04);
+  }
+
+  /* ── CS ACTION ROW ───────────────────────────────────────────────────────── */
+  #cs-action-row {
+    display: none; align-items: center; padding: 0 16px; height: 34px; gap: 8px;
+    background: #0a0a0a; border-bottom: 1px solid var(--border);
+  }
+  #cs-action-row.visible { display: flex; }
+  body.theme-light #cs-action-row { background: #F8FAFC; border-bottom-color: var(--border); }
+
 </style>
 </head>
 <body>
@@ -1997,19 +2063,35 @@
       <button id="theme-toggle" onclick="toggleTheme()" title="Cambiar a modo oscuro">🌙</button>
     </div>
   </div>
-  <!-- ROW 2: action buttons -->
-  <div class="topbar-row2">
-    <button id="btn-dashboard" onclick="openDashboard()" class="tb-btn admin-only">📈 DASHBOARD</button>
-    <button id="btn-datos" onclick="openDataExplorer()" class="tb-btn admin-only">📊 DATOS</button>
-    <button id="btn-kpis" onclick="openKPIs()" class="tb-btn admin-only">🎯 KPIs</button>
-    <button onclick="openClientes()" class="tb-btn admin-only">👥 CLIENTES</button>
-    <button onclick="openHistorial()" class="tb-btn admin-only">📋 HISTORIAL</button>
-    <button onclick="openDocs()" class="tb-btn admin-only">📖 DOCS</button>
-    <button id="api-key-btn" onclick="openConfig()" class="tb-btn tb-api admin-only">⚙ CONFIGURAR</button>
-    <button onclick="openSlackPanel()" class="tb-btn tb-slack admin-only" id="slack-btn">🔔 SLACK</button>
-    <button id="shopify-btn" class="tb-btn tb-shopify admin-only" onclick="pollShopifyNow()" style="display:none">🛍 SHOPIFY</button>
+  <!-- ROW 2: admin tools (collapses for non-admin) -->
+  <div class="topbar-row2 admin-only">
+    <div class="tools-menu" id="tools-menu">
+      <button class="tools-menu-trigger" id="tools-trigger" onclick="toggleToolsMenu()">
+        ▦ HERRAMIENTAS <span id="tools-arrow" style="font-size:9px;opacity:0.7">▾</span>
+      </button>
+      <div class="tools-dropdown" id="tools-dropdown">
+        <button class="td-item" onclick="openDashboard();closeToolsMenu()">📈 Dashboard</button>
+        <button class="td-item" onclick="openKPIs();closeToolsMenu()">🎯 KPIs en vivo</button>
+        <button class="td-item" onclick="openDataExplorer();closeToolsMenu()">📊 Explorador de datos</button>
+        <div class="td-sep"></div>
+        <button class="td-item" onclick="openClientes();closeToolsMenu()">👥 Clientes</button>
+        <button class="td-item" onclick="openHistorial();closeToolsMenu()">📋 Historial de decisiones</button>
+        <div class="td-sep"></div>
+        <button class="td-item" onclick="openSlackPanel();closeToolsMenu()" id="slack-btn">🔔 Slack notifications</button>
+        <button class="td-item" id="shopify-menu-btn" onclick="pollShopifyNow();closeToolsMenu()" style="display:none">🛍 Shopify (sincronizar)</button>
+        <button class="td-item" onclick="openDocs();closeToolsMenu()">📖 Documentación</button>
+      </div>
+    </div>
+    <button id="api-key-btn" onclick="openConfig()" class="tb-btn tb-api" style="margin-left:6px">⚙ CONFIGURAR</button>
     <div style="margin-left:auto"></div>
-    <button id="war-room-toggle" class="admin-only" onclick="toggleWarRoom()">⬛ WAR ROOM</button>
+    <button id="war-room-toggle" onclick="toggleWarRoom()">⬛ WAR ROOM</button>
+  </div>
+  <!-- ROW 2: CS tools (visible only for CS role) -->
+  <div id="cs-action-row">
+    <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em">CUSTOMER SUCCESS</span>
+    <div style="width:1px;height:16px;background:var(--border)"></div>
+    <button onclick="openHistorial()" class="tb-btn">📋 HISTORIAL</button>
+    <button onclick="openSlackPanel()" class="tb-btn tb-slack">🔔 SLACK</button>
   </div>
 </div>
 
@@ -2032,9 +2114,10 @@
 
   <!-- LEFT: ALERTS -->
   <div class="panel" id="alerts-panel">
-    <div class="panel-header">
+    <div class="panel-header" onclick="handleAlertsPanelClick(event)">
       ALERTAS PROACTIVAS
       <span class="panel-badge" id="alerts-count">0</span>
+      <button class="panel-collapse-btn" id="alerts-collapse-btn" onclick="event.stopPropagation();toggleAlertsCollapse()" title="Minimizar panel">◀</button>
     </div>
     <div class="panel-content" id="alerts-container">
       <div class="empty-state">Analizando datos...</div>
@@ -2077,7 +2160,8 @@
 
   <!-- RIGHT: INVENTORY RISK -->
   <div class="panel" id="inventory-panel">
-    <div class="panel-header">
+    <div class="panel-header" onclick="handleInventoryPanelClick(event)">
+      <button class="panel-collapse-btn" id="inv-collapse-btn" onclick="event.stopPropagation();toggleInventoryCollapse()" title="Minimizar panel">▶</button>
       RIESGO INVENTARIO
       <span class="panel-badge" id="inv-count">0</span>
     </div>
@@ -3059,6 +3143,10 @@ function runAlertEngine() {
   MODEL.alertsGenerated = alerts;
   renderAlerts(alerts);
   systemContextCache = '';
+  // Tint alert panel header when there are critical alerts
+  const alertsPanel = document.getElementById('alerts-panel');
+  const criticals = alerts.filter(a => a.severity === 'critical').length;
+  if (alertsPanel) alertsPanel.classList.toggle('has-critical', criticals > 0);
 
   // Auto-activate war room if thresholds hit
   const critCount = alerts.filter(a => a.severity === 'critical').length;
@@ -4034,6 +4122,70 @@ function downloadCurrentCSV() {
 }
 
 // ─── ROLES ───────────────────────────────────────────────────────────────────
+// ─── HERRAMIENTAS DROPDOWN ────────────────────────────────────────────────────
+function toggleToolsMenu() {
+  const drop = document.getElementById('tools-dropdown');
+  const trigger = document.getElementById('tools-trigger');
+  const arrow = document.getElementById('tools-arrow');
+  const open = drop.classList.toggle('open');
+  trigger.classList.toggle('open', open);
+  if (arrow) arrow.textContent = open ? '▴' : '▾';
+}
+function closeToolsMenu() {
+  const drop = document.getElementById('tools-dropdown');
+  const trigger = document.getElementById('tools-trigger');
+  const arrow = document.getElementById('tools-arrow');
+  if (drop) drop.classList.remove('open');
+  if (trigger) trigger.classList.remove('open');
+  if (arrow) arrow.textContent = '▾';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('tools-menu');
+  if (menu && !menu.contains(e.target)) closeToolsMenu();
+});
+
+// ─── PANEL COLLAPSE ───────────────────────────────────────────────────────────
+let alertsCollapsed = false;
+let inventoryCollapsed = false;
+
+function updateMainGrid() {
+  const cfg = ROLE_CONFIG[currentRole];
+  const showAlerts    = cfg.showAlerts;
+  const showInventory = cfg.showInventory;
+  const ac = alertsCollapsed    ? '36px' : (showAlerts    ? (currentRole === 'admin' ? '300px' : '280px') : '0');
+  const ic = inventoryCollapsed ? '36px' : (showInventory ? '290px' : '0');
+  let cols;
+  if (showAlerts && showInventory)   cols = `${ac} 1fr ${ic}`;
+  else if (showAlerts)               cols = `${ac} 1fr`;
+  else if (showInventory)            cols = `1fr ${ic}`;
+  else                               cols = '1fr';
+  document.getElementById('main').style.gridTemplateColumns = cols;
+}
+
+function toggleAlertsCollapse() {
+  alertsCollapsed = !alertsCollapsed;
+  const panel = document.getElementById('alerts-panel');
+  const btn   = document.getElementById('alerts-collapse-btn');
+  panel.classList.toggle('panel-collapsed', alertsCollapsed);
+  if (btn) btn.textContent = alertsCollapsed ? '▶' : '◀';
+  updateMainGrid();
+}
+function handleAlertsPanelClick(e) {
+  if (alertsCollapsed) toggleAlertsCollapse();
+}
+
+function toggleInventoryCollapse() {
+  inventoryCollapsed = !inventoryCollapsed;
+  const panel = document.getElementById('inventory-panel');
+  const btn   = document.getElementById('inv-collapse-btn');
+  panel.classList.toggle('panel-collapsed', inventoryCollapsed);
+  if (btn) btn.textContent = inventoryCollapsed ? '◀' : '▶';
+  updateMainGrid();
+}
+function handleInventoryPanelClick(e) {
+  if (inventoryCollapsed) toggleInventoryCollapse();
+}
+
 const ROLE_CONFIG = {
   admin: {
     label: '👤 ADMIN',
@@ -4107,11 +4259,12 @@ function applyRoleVisibility() {
   document.querySelectorAll('.admin-only').forEach(el => {
     el.classList.toggle('role-hidden', !cfg.showAdminTools);
   });
-  // Hide entire action row if no admin tools visible
-  const row2 = document.querySelector('.topbar-row2');
-  if (row2) row2.style.display = cfg.showAdminTools ? '' : 'none';
 
-  // Panels
+  // CS action row
+  const csRow = document.getElementById('cs-action-row');
+  if (csRow) csRow.classList.toggle('visible', currentRole === 'cs');
+
+  // Panels visibility
   document.getElementById('alerts-panel').classList.toggle('role-hidden', !cfg.showAlerts);
   document.getElementById('inventory-panel').classList.toggle('role-hidden', !cfg.showInventory);
 
@@ -4123,9 +4276,10 @@ function applyRoleVisibility() {
   const reviewCounter = document.getElementById('review-count').parentElement;
   if (reviewCounter) reviewCounter.classList.toggle('role-hidden', !cfg.showAdminTools);
 
-  // Main grid — adjust height based on whether action row is visible
-  document.getElementById('main').style.height = cfg.showAdminTools ? 'calc(100vh - 116px)' : 'calc(100vh - 82px)';
-  document.getElementById('main').style.gridTemplateColumns = cfg.mainGrid;
+  // Main grid height — admin row2 + cs row = 34px each, base topbar = 82px
+  const extraRows = cfg.showAdminTools ? 34 : (currentRole === 'cs' ? 34 : 0);
+  document.getElementById('main').style.height = `calc(100vh - ${82 + extraRows}px)`;
+  updateMainGrid();
 
   // Auto column: full width when alone (agent view)
   const autoCol = document.querySelector('#tickets-panel .ticket-col:first-child');
@@ -4465,13 +4619,10 @@ function closeSlackPanel() {
 function saveSlackWebhook() {
   const val = document.getElementById('slack-webhook-input').value.trim();
   slackWebhookUrl = val;
-  const btn = document.getElementById('slack-btn');
   if (val) {
-    btn.style.borderColor = '#4caf50'; btn.style.color = '#4caf50';
     showToast('✓ Webhook guardado — enviando notificaciones HUMANO');
     queueSlackNotifications();
   } else {
-    btn.style.borderColor = '#3a1f6e'; btn.style.color = '#7c5cbf';
     showToast('Webhook eliminado');
   }
 }
@@ -5433,7 +5584,7 @@ let _shopifyLastUpdated = null;
 let _shopifyPollerTimer = null;
 
 async function pollShopify() {
-  const btn = document.getElementById('shopify-btn');
+  const btn = document.getElementById('shopify-menu-btn');
   try {
     const params = _shopifyLastUpdated ? `?updated_at_min=${encodeURIComponent(_shopifyLastUpdated)}` : '';
     const r = await fetch(`/api/shopify${params}`, { headers: shopifyHeaders() });
@@ -6087,8 +6238,8 @@ function updateConfigStatus() {
     btn.textContent = allOk ? '⚙ TODO ACTIVO' : partOk ? '⚙ PARCIAL' : '⚙ CONFIGURAR';
   }
 
-  // Show/hide shopify button in topbar
-  const sbtn = document.getElementById('shopify-btn');
+  // Show/hide shopify button in tools menu
+  const sbtn = document.getElementById('shopify-menu-btn');
   if (sbtn) sbtn.style.display = (shUrl && shTok) ? '' : 'none';
 
   // Email status
