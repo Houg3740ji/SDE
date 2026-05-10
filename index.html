@@ -103,17 +103,14 @@
   .tb-btn.tb-api { border-color: var(--green-dim); color: var(--green-bright); }
   .tb-btn.tb-api:hover { border-color: var(--green-bright); color: #fff; }
   #war-room-toggle {
-    font-family: var(--display); font-size: 13px; font-weight: 900; letter-spacing: 0.18em;
-    text-transform: uppercase; padding: 6px 18px; border: 2px solid var(--red);
-    background: transparent; color: var(--red); cursor: pointer; transition: all 0.2s;
-    white-space: nowrap; flex-shrink: 0;
+    font-family: var(--display); font-size: 12px; font-weight: 900; letter-spacing: 0.14em;
+    text-transform: uppercase; padding: 7px 12px; border: 2px solid var(--red);
+    background: transparent; color: var(--red); cursor: pointer; transition: background 0.2s, color 0.2s;
+    white-space: nowrap; flex-shrink: 0; border-radius: 4px;
   }
   #war-room-toggle:hover, #war-room-toggle.active {
     background: var(--red); color: white;
-    box-shadow: 0 0 20px rgba(192,57,43,0.45);
-    animation: war-pulse 1.5s infinite;
   }
-  @keyframes war-pulse { 0%,100% { box-shadow: 0 0 16px rgba(192,57,43,0.4); } 50% { box-shadow: 0 0 32px rgba(192,57,43,0.7); } }
 
   /* MAIN GRID */
   #main {
@@ -160,11 +157,12 @@
   .alert-badge.info { background: var(--green); color: white; }
   .alert-msg { font-size: 11px; color: var(--text); line-height: 1.5; margin-bottom: 8px; }
   .alert-meta { font-size: 10px; color: var(--muted); }
+  .alert-item-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
   .dismiss-btn {
-    position: absolute; top: 6px; right: 6px; width: 18px; height: 18px;
+    width: 18px; height: 18px; flex-shrink: 0;
     border: none; background: transparent; color: var(--muted); cursor: pointer;
-    font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; transition: background 0.15s, color 0.15s; opacity: 0;
+    font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center;
+    border-radius: 3px; transition: background 0.15s, color 0.15s; opacity: 0;
   }
   .alert-item:hover .dismiss-btn,
   .ticket-card:hover .dismiss-btn { opacity: 1; }
@@ -1058,6 +1056,7 @@
   body.theme-light .panel-header { background: #FFFFFF; border-bottom-color: var(--border); }
   body.theme-light .panel-badge { background: #F1F5F9; color: var(--muted); }
   /* Alerts */
+  body.theme-light #alerts-panel, body.theme-light #alerts-panel .panel-header { background: #F8FAFC; }
   body.theme-light .alert-item { background: #FFFFFF; border-color: var(--border); }
   /* Tickets */
   body.theme-light .ticket-col { background: var(--bg); }
@@ -2025,10 +2024,13 @@
   #inventory-panel.panel-collapsed .panel-collapse-btn {
     writing-mode: horizontal-tb; transform: rotate(90deg);
   }
+  /* Match alerts panel content bg to card bg */
+  #alerts-panel { background: var(--surface); }
+  #alerts-panel .panel-header { background: var(--surface); }
   /* Alert panel header urgency tint */
   #alerts-panel.has-critical .panel-header {
     border-bottom-color: rgba(248,113,113,0.4);
-    background: rgba(248,113,113,0.04);
+    background: rgba(248,113,113,0.06);
   }
 
   /* ── CS ACTION ROW ───────────────────────────────────────────────────────── */
@@ -2056,7 +2058,6 @@
   <div class="topbar-row1">
     <img src="https://scuffers.com/cdn/shop/files/Logo_Scuffers_Blanco_500x.png" alt="Scuffers">
     <div class="topbar-sep"></div>
-    <div class="title">OPS BRAIN</div>
     <div id="role-badge" class="role-badge role-admin" onclick="openRolesPanel()">👤 ADMIN ▾</div>
     <div class="topbar-sep"></div>
     <div class="live-counter">
@@ -2087,6 +2088,8 @@
       <span class="live-badge"><span class="live-badge-dot"></span>LIVE · <span id="live-users">1</span> usuario(s)</span>
       <div class="refresh-time" id="refresh-time">ACTUALIZADO —</div>
       <button id="theme-toggle" onclick="toggleTheme()" title="Cambiar a modo oscuro">🌙</button>
+      <div class="topbar-sep"></div>
+      <button id="war-room-toggle" onclick="toggleWarRoom()">⬛ WAR ROOM</button>
     </div>
   </div>
   <!-- ROW 2: admin tools (collapses for non-admin) -->
@@ -2109,8 +2112,6 @@
       </div>
     </div>
     <button id="api-key-btn" onclick="openConfig()" class="tb-btn tb-api" style="margin-left:6px">⚙ CONFIGURAR</button>
-    <div style="margin-left:auto"></div>
-    <button id="war-room-toggle" onclick="toggleWarRoom()">⬛ WAR ROOM</button>
   </div>
   <!-- ROW 2: CS tools (visible only for CS role) -->
   <div id="cs-action-row">
@@ -3174,11 +3175,8 @@ function runAlertEngine() {
   const criticals = alerts.filter(a => a.severity === 'critical').length;
   if (alertsPanel) alertsPanel.classList.toggle('has-critical', criticals > 0);
 
-  // Auto-activate war room if thresholds hit
+  // Auto-activate war room if thresholds hit (no animation — button turns solid red when active)
   const critCount = alerts.filter(a => a.severity === 'critical').length;
-  if (critCount >= 2 && !warRoomOpen) {
-    document.getElementById('war-room-toggle').style.animation = 'war-pulse 0.5s infinite';
-  }
 }
 
 function renderAlerts(alerts) {
@@ -3194,8 +3192,10 @@ function renderAlerts(alerts) {
 
   el.innerHTML = alerts.map((a, i) => `
     <div class="alert-item ${esc(a.severity)}">
-      <button class="dismiss-btn" onclick="dismissAlert(${i})" title="Descartar alerta">×</button>
-      <div><span class="alert-badge ${esc(a.severity)}">${esc(a.severity).toUpperCase()}</span></div>
+      <div class="alert-item-top">
+        <span class="alert-badge ${esc(a.severity)}">${esc(a.severity).toUpperCase()}</span>
+        <button class="dismiss-btn" onclick="dismissAlert(${i})" title="Descartar alerta">×</button>
+      </div>
       <div style="font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:4px">${esc(a.title)}</div>
       <div class="alert-msg">${esc(a.msg)}</div>
       <button class="alert-action ${esc(a.actionColor)}" onclick="alertAction('${esc(a.ref)}', '${esc(a.severity)}')">${esc(a.action)} →</button>
@@ -3407,11 +3407,11 @@ function renderTickets() {
       const orderId = showBiz ? `${esc(t.ticket_id)} · ${esc(t.order_id)}` : esc(t.ticket_id);
       const tid = esc(t.ticket_id);
       return `
-        <div class="ticket-card" id="tc-${tid}" style="position:relative">
-          <button class="dismiss-btn" onclick="dismissAutoTicket('${tid}')" title="Archivar ticket">×</button>
+        <div class="ticket-card" id="tc-${tid}">
           <div class="ticket-top">
             <span class="ticket-id">${orderId}</span>
             <span class="ticket-urgency urgency-${esc(t.support_ticket_urgency)}">${esc(t.support_ticket_urgency).toUpperCase()}</span>
+            <button class="dismiss-btn" onclick="dismissAutoTicket('${tid}')" title="Archivar ticket">×</button>
           </div>
           <div class="ticket-msg">${esc(t.support_ticket_message)}</div>
           <div class="ticket-meta">
