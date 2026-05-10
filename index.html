@@ -3204,8 +3204,11 @@ function toggleTheme() {
 }
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
-const AUTH_SUPA_URL = 'https://rdbtunqmagyqbdheutmv.supabase.co';
-const AUTH_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkYnR1bnFtYWd5cWJkaGV1dG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMzg1ODEsImV4cCI6MjA5MzkxNDU4MX0.jPskoAavrorOazPaBjnkDxoZHF2Lp0U5tWSaSR4j2YY';
+// Hashes SHA-256 de las credenciales (sin red, sin CORS, sin timeout)
+const AUTH_USERS = {
+  'admin':    { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', role: 'admin' },
+  'empleado': { hash: '0baff97ff722b0be472c1ff5a1edabf7cefb089d0575794975c3007989327efa', role: 'empleado' },
+};
 
 let sessionRole = null; // 'admin' | 'empleado' — set after successful login
 
@@ -3230,48 +3233,21 @@ async function attemptLogin() {
 
   try {
     const hash = await sha256(password);
-    const url  = `${AUTH_SUPA_URL}/rest/v1/app_users?username=eq.${encodeURIComponent(username)}&password_hash=eq.${encodeURIComponent(hash)}&select=username,role`;
+    const record = AUTH_USERS[username];
 
-    // 8-second timeout so it never hangs forever
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
-
-    let res;
-    try {
-      res = await fetch(url, {
-        signal: controller.signal,
-        headers: { 'apikey': AUTH_SUPA_KEY, 'Authorization': `Bearer ${AUTH_SUPA_KEY}` }
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-
-    if (!res.ok) {
-      errEl.textContent = `Error del servidor (${res.status}). Inténtalo de nuevo.`;
-      reset(); return;
-    }
-
-    const data = await res.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
+    if (!record || record.hash !== hash) {
       errEl.textContent = 'Usuario o contraseña incorrectos.';
       reset(); return;
     }
 
-    const user = data[0];
-    sessionRole = user.role;
-    sessionStorage.setItem('ops_session', JSON.stringify({ username: user.username, role: user.role }));
+    sessionRole = record.role;
+    sessionStorage.setItem('ops_session', JSON.stringify({ username, role: record.role }));
 
-    // Hide login, start app
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('loading-screen').style.display = 'flex';
     boot();
   } catch(e) {
-    if (e.name === 'AbortError') {
-      errEl.textContent = 'Tiempo de espera agotado. Comprueba tu conexión.';
-    } else {
-      errEl.textContent = 'Error de conexión. Inténtalo de nuevo.';
-    }
+    errEl.textContent = 'Error inesperado. Recarga la página.';
     reset();
   }
 }
