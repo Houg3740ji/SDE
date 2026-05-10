@@ -1,6 +1,6 @@
 {
   "name": "scuffers-ops-brain",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Scuffers OPS Brain — Panel de operaciones en tiempo real",
   "main": "main.js",
   "author": "Scuffers <ops@scuffers.com>",
@@ -30,7 +30,10 @@
     "files": [
       "main.js",
       "preload.js",
+      "preload-login.js",
+      "login.html",
       "splash.html",
+      "offline.html",
       "assets/**"
     ],
     "win": {

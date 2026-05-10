@@ -9,6 +9,7 @@ const ICON_PATH = path.join(__dirname, 'assets', 'icon.png');
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let mainWindow   = null;
+let loginWindow  = null;
 let splashWindow = null;
 let tray         = null;
 let isQuitting   = false;
@@ -24,29 +25,19 @@ function setupAutoUpdater() {
 
   autoUpdater.on('update-downloaded', () => {
     if (mainWindow) mainWindow.webContents.send('update-downloaded');
-    // Show native notification
-    showNativeNotification(
-      '🔄 Actualización lista',
-      'Se instalará la próxima vez que cierres la aplicación.'
-    );
+    showNativeNotification('🔄 Actualización lista', 'Se instalará al cerrar la aplicación.');
   });
 
-  autoUpdater.on('error', (err) => {
-    console.error('Auto-updater error:', err.message);
-  });
+  autoUpdater.on('error', (err) => console.error('Auto-updater error:', err.message));
 
-  // Check every 2 hours
   autoUpdater.checkForUpdatesAndNotify().catch(() => {});
-  setInterval(() => {
-    autoUpdater.checkForUpdatesAndNotify().catch(() => {});
-  }, 2 * 60 * 60 * 1000);
+  setInterval(() => autoUpdater.checkForUpdatesAndNotify().catch(() => {}), 2 * 60 * 60 * 1000);
 }
 
 // ─── NATIVE NOTIFICATION ─────────────────────────────────────────────────────
 function showNativeNotification(title, body) {
   if (!Notification.isSupported()) return;
-  const icon = nativeImage.createFromPath(ICON_PATH);
-  new Notification({ title, body, icon }).show();
+  new Notification({ title, body, icon: nativeImage.createFromPath(ICON_PATH) }).show();
 }
 
 // ─── TRAY ────────────────────────────────────────────────────────────────────
@@ -54,17 +45,32 @@ function createTray() {
   const icon = nativeImage.createFromPath(ICON_PATH).resize({ width: 16, height: 16 });
   tray = new Tray(icon);
   tray.setToolTip(APP_NAME);
-
-  const menu = Menu.buildFromTemplate([
+  tray.setContextMenu(Menu.buildFromTemplate([
     { label: '📊 Abrir OPS Brain',  click: () => { mainWindow?.show(); mainWindow?.focus(); } },
     { type: 'separator' },
     { label: '🔄 Buscar actualizaciones', click: () => autoUpdater.checkForUpdatesAndNotify().catch(() => {}) },
     { type: 'separator' },
     { label: '❌ Salir', click: () => { isQuitting = true; app.quit(); } },
-  ]);
-
-  tray.setContextMenu(menu);
+  ]));
   tray.on('double-click', () => { mainWindow?.show(); mainWindow?.focus(); });
+}
+
+// ─── LOGIN WINDOW ─────────────────────────────────────────────────────────────
+function createLoginWindow() {
+  loginWindow = new BrowserWindow({
+    width: 440, height: 520,
+    frame: false, resizable: false,
+    center: true,
+    icon: ICON_PATH,
+    title: APP_NAME,
+    backgroundColor: '#0e1117',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload-login.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  loginWindow.loadFile(path.join(__dirname, 'login.html'));
 }
 
 // ─── SPLASH ──────────────────────────────────────────────────────────────────
@@ -81,7 +87,7 @@ function createSplash() {
 }
 
 // ─── MAIN WINDOW ─────────────────────────────────────────────────────────────
-function createMainWindow() {
+function createMainWindow(username, role) {
   mainWindow = new BrowserWindow({
     width: 1440, height: 900,
     minWidth: 900, minHeight: 600,
@@ -97,93 +103,79 @@ function createMainWindow() {
     },
   });
 
-  // Load the Vercel app
   mainWindow.loadURL(APP_URL);
 
-  // Show main window once loaded, hide splash
+  // Once loaded, inject session into the page so it skips the login screen
   mainWindow.webContents.once('did-finish-load', () => {
+    const session = JSON.stringify({ username, role });
+    mainWindow.webContents.executeJavaScript(`
+      try { sessionStorage.setItem('ops_session', ${JSON.stringify(session)}); } catch(e) {}
+    `).catch(() => {});
+
     setTimeout(() => {
       splashWindow?.close();
       splashWindow = null;
       mainWindow.show();
       mainWindow.focus();
-    }, 600); // brief pause so splash doesn't flash away instantly
+    }, 600);
   });
 
-  // If load fails (offline), show anyway with a message
   mainWindow.webContents.on('did-fail-load', () => {
     splashWindow?.close();
     splashWindow = null;
-    mainWindow.loadFile(path.join(__dirname, 'offline.html')).catch(() => {
-      mainWindow.show();
-    });
+    mainWindow.loadFile(path.join(__dirname, 'offline.html')).catch(() => mainWindow.show());
   });
 
-  // Minimise to tray instead of closing
   mainWindow.on('close', (e) => {
     if (!isQuitting) {
       e.preventDefault();
       mainWindow.hide();
-      if (process.platform !== 'darwin') {
-        showNativeNotification(APP_NAME, 'La app sigue corriendo en la bandeja del sistema.');
-      }
     }
   });
 
-  // Open external links in the default browser, not in the app
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
   });
 
-  // Update window title with alert count from renderer
   ipcMain.on('set-badge', (_, count) => {
-    if (count > 0) {
-      mainWindow?.setTitle(`${APP_NAME} · ${count} alertas`);
-      app.setBadgeCount?.(count); // macOS
-    } else {
-      mainWindow?.setTitle(APP_NAME);
-      app.setBadgeCount?.(0);
-    }
-    // Update tray tooltip
-    tray?.setToolTip(count > 0 ? `${APP_NAME} — ${count} alertas nuevas` : APP_NAME);
+    mainWindow?.setTitle(count > 0 ? `${APP_NAME} · ${count} alertas` : APP_NAME);
+    app.setBadgeCount?.(count > 0 ? count : 0);
+    tray?.setToolTip(count > 0 ? `${APP_NAME} — ${count} alertas` : APP_NAME);
   });
 
-  // Trigger native notification from renderer
-  ipcMain.on('native-notify', (_, { title, body }) => {
-    showNativeNotification(title, body);
-  });
+  ipcMain.on('native-notify', (_, { title, body }) => showNativeNotification(title, body));
 }
 
 // ─── APP LIFECYCLE ────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
-  createSplash();
-  createMainWindow();
-  createTray();
+  createLoginWindow();
 
-  // Check for updates 3s after launch (give time to settle)
-  setTimeout(() => setupAutoUpdater(), 3000);
+  // When login succeeds, close login, show splash + main window
+  ipcMain.once('login-success', (_, { username, role }) => {
+    loginWindow?.close();
+    loginWindow = null;
+    createSplash();
+    createMainWindow(username, role);
+    createTray();
+    setTimeout(() => setupAutoUpdater(), 3000);
+  });
 
   app.on('activate', () => {
-    // macOS: re-open window when clicking dock icon
-    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
-    else mainWindow?.show();
+    if (mainWindow) mainWindow.show();
+    else if (!loginWindow) createLoginWindow();
   });
 });
 
 app.on('window-all-closed', () => {
-  // On macOS, keep app alive in menu bar
-  if (process.platform !== 'darwin') {
-    // Don't quit — we have a tray icon
-  }
+  if (process.platform === 'darwin' && tray) return; // keep alive on mac
 });
 
 app.on('before-quit', () => { isQuitting = true; });
 
-// Security: prevent new windows from opening navigation
 app.on('web-contents-created', (_, contents) => {
   contents.on('will-navigate', (e, url) => {
-    if (!url.startsWith(APP_URL) && !url.startsWith('https://spd-')) {
+    if (!url.startsWith(APP_URL) && !url.startsWith('https://spd-') && !url.startsWith('file://')) {
       e.preventDefault();
       shell.openExternal(url);
     }
