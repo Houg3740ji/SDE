@@ -2275,7 +2275,7 @@
 </div>
 
 <!-- CONFIGURACIÓN PANEL -->
-<div id="config-panel" style="position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+<div id="config-panel" onclick="if(event.target===this)closeConfig()" style="position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 32px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:20px;box-shadow:var(--shadow-lg)">
 
     <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);padding-bottom:14px">
