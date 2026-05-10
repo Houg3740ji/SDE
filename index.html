@@ -2316,25 +2316,17 @@
       <div style="display:flex;align-items:center;gap:8px">
         <span id="cfg-groq-dot" style="width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0"></span>
         <span style="font-size:11px;font-weight:700;letter-spacing:0.08em">GROQ — IA (War Room · Briefing · Tickets)</span>
-        <span id="cfg-groq-lbl" style="font-size:10px;color:var(--muted);margin-left:auto">no configurado</span>
+        <span id="cfg-groq-lbl" style="font-size:10px;color:var(--muted);margin-left:auto">gestionado por servidor</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px">
+        <span style="font-size:16px">🔒</span>
+        <span style="font-size:11px;color:var(--muted);line-height:1.5">La API key está almacenada de forma segura como variable de entorno en el servidor. No se expone nunca al navegador.</span>
       </div>
       <div style="display:flex;gap:8px">
-        <input id="cfg-groq-key" type="password" placeholder="gsk_xxxxxxxxxxxxxxxxxx"
-          style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--text);font-family:var(--font-code)"
-          oninput="updateShowBtn('cfg-groq-key','cfg-groq-show')">
-        <button id="cfg-groq-show" onclick="toggleShow('cfg-groq-key','cfg-groq-show')"
-          style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 12px;font-size:11px;color:var(--muted);cursor:pointer">👁</button>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="saveGroqKey()"
-          style="background:var(--green-dim);border:1px solid var(--green);border-radius:var(--radius-sm);padding:7px 18px;font-size:11px;font-weight:700;color:var(--green-bright);cursor:pointer;letter-spacing:0.06em">GUARDAR</button>
         <button onclick="testGroq()"
           style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 18px;font-size:11px;color:var(--muted);cursor:pointer">PROBAR CONEXIÓN</button>
-        <button onclick="clearGroqKey()"
-          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:7px 6px">BORRAR</button>
       </div>
       <div id="cfg-groq-msg" style="font-size:11px;color:var(--muted);min-height:16px"></div>
-      <div style="font-size:10px;color:var(--muted)">Obtén tu API key gratuita en <span style="color:var(--blue);font-family:var(--font-code)">console.groq.com</span> → API Keys → Create</div>
     </div>
 
     <div style="border-top:1px solid var(--border)"></div>
@@ -6389,8 +6381,7 @@ function _cfgDel(k)    { try { localStorage.removeItem(k); } catch(e) {} }
 
 // Return extra headers to include when calling /api/groq
 function groqHeaders() {
-  const key = _cfgGet('spd_groq_key');
-  return key ? { 'x-groq-key': key } : {};
+  return {}; // Key is managed server-side via environment variable
 }
 
 function groqFriendlyError(data) {
