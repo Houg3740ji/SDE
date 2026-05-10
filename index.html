@@ -1057,6 +1057,7 @@
   body.theme-light .panel-badge { background: #F1F5F9; color: var(--muted); }
   /* Alerts */
   body.theme-light #alerts-panel, body.theme-light #alerts-panel .panel-header { background: #F8FAFC; }
+  body.theme-light #alerts-panel.has-critical .panel-header { background: #FFF5F5; }
   body.theme-light .alert-item { background: #FFFFFF; border-color: var(--border); }
   /* Tickets */
   body.theme-light .ticket-col { background: var(--bg); }
@@ -2024,13 +2025,13 @@
   #inventory-panel.panel-collapsed .panel-collapse-btn {
     writing-mode: horizontal-tb; transform: rotate(90deg);
   }
-  /* Match alerts panel content bg to card bg */
+  /* Match alerts panel content bg to card bg, always opaque */
   #alerts-panel { background: var(--surface); }
   #alerts-panel .panel-header { background: var(--surface); }
-  /* Alert panel header urgency tint */
+  /* Alert panel header urgency tint — keep opaque */
   #alerts-panel.has-critical .panel-header {
-    border-bottom-color: rgba(248,113,113,0.4);
-    background: rgba(248,113,113,0.06);
+    border-bottom-color: rgba(248,113,113,0.5);
+    background: #1d1b28;
   }
 
   /* ── CS ACTION ROW ───────────────────────────────────────────────────────── */
@@ -2188,9 +2189,9 @@
   <!-- RIGHT: INVENTORY RISK -->
   <div class="panel" id="inventory-panel">
     <div class="panel-header" onclick="handleInventoryPanelClick(event)">
-      <button class="panel-collapse-btn" id="inv-collapse-btn" onclick="event.stopPropagation();toggleInventoryCollapse()" title="Minimizar panel">▶</button>
       RIESGO INVENTARIO
       <span class="panel-badge" id="inv-count">0</span>
+      <button class="panel-collapse-btn" id="inv-collapse-btn" onclick="event.stopPropagation();toggleInventoryCollapse()" title="Minimizar panel">▶</button>
     </div>
     <div id="inventory-container"></div>
   </div>
