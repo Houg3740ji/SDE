@@ -2270,13 +2270,43 @@
   }
   body.is-mobile .btn-edit  { min-height: 44px; padding: 12px 14px !important; font-size: 11px !important; }
 
-  /* ── Inventory (Existencias) panel ── */
-  body.is-mobile #inventory-panel .panel-header { cursor: default !important; }
-  body.is-mobile #inventory-container {
+  /* ── Inventory (Existencias) panel — override collapsed desktop state ── */
+  body.is-mobile #inventory-panel,
+  body.is-mobile #inventory-panel.panel-collapsed {
+    overflow: hidden !important;
+    min-width: 0 !important; cursor: default !important;
+  }
+  /* Reset vertical writing-mode from collapsed panel header */
+  body.is-mobile #inventory-panel .panel-header,
+  body.is-mobile #inventory-panel.panel-collapsed .panel-header {
+    writing-mode: horizontal-tb !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    height: auto !important;
+    padding: 12px 16px !important;
+    gap: 8px !important;
+    cursor: default !important;
+    letter-spacing: 0.06em !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+  /* Always show inventory container on mobile */
+  body.is-mobile #inventory-container,
+  body.is-mobile #inventory-panel.panel-collapsed #inventory-container {
+    display: block !important;
     flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
     padding: 10px 12px;
   }
-  body.is-mobile .inv-item { padding: 12px 14px; }
+  body.is-mobile .inv-item {
+    padding: 14px 16px; margin-bottom: 10px;
+  }
+  /* Stats wrap on narrow screens */
+  body.is-mobile .inv-stats {
+    flex-wrap: wrap; gap: 8px 16px; font-size: 11px;
+  }
+  body.is-mobile .inv-top { flex-wrap: wrap; gap: 4px; }
+  body.is-mobile .inv-name { font-size: 14px; }
+  body.is-mobile .inv-sku  { font-size: 11px; }
 
   /* ── Modals: full-screen on mobile ── */
   body.is-mobile #config-panel > div {
@@ -3285,6 +3315,9 @@ const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) |
 function initMobileUI() {
   if (!IS_MOBILE) return;
   document.body.classList.add('is-mobile');
+  // Remove desktop collapsed states that break mobile layout
+  document.getElementById('inventory-panel')?.classList.remove('panel-collapsed');
+  document.getElementById('alerts-panel')?.classList.remove('panel-collapsed');
   // Show alerts panel first by default
   switchMobileTab('alertas');
 }
