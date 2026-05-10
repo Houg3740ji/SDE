@@ -1057,7 +1057,6 @@
   body.theme-light .panel-badge { background: #F1F5F9; color: var(--muted); }
   /* Alerts */
   body.theme-light #alerts-panel, body.theme-light #alerts-panel .panel-header { background: #F8FAFC; }
-  body.theme-light #alerts-panel.has-critical .panel-header { background: #FFF5F5; }
   body.theme-light .alert-item { background: #FFFFFF; border-color: var(--border); }
   /* Tickets */
   body.theme-light .ticket-col { background: var(--bg); }
@@ -2028,11 +2027,6 @@
   /* Match alerts panel content bg to card bg, always opaque */
   #alerts-panel { background: var(--surface); }
   #alerts-panel .panel-header { background: var(--surface); }
-  /* Alert panel header urgency tint — keep opaque */
-  #alerts-panel.has-critical .panel-header {
-    border-bottom-color: rgba(248,113,113,0.5);
-    background: #1d1b28;
-  }
 
   /* ── CS ACTION ROW ───────────────────────────────────────────────────────── */
   #cs-action-row {
@@ -3173,9 +3167,6 @@ function runAlertEngine() {
   systemContextCache = '';
   // Tint alert panel header when there are critical alerts
   const alertsPanel = document.getElementById('alerts-panel');
-  const criticals = alerts.filter(a => a.severity === 'critical').length;
-  if (alertsPanel) alertsPanel.classList.toggle('has-critical', criticals > 0);
-
   // Auto-activate war room if thresholds hit (no animation — button turns solid red when active)
   const critCount = alerts.filter(a => a.severity === 'critical').length;
 }
