@@ -66,13 +66,12 @@
   /* TOPBAR */
   #topbar {
     position: sticky; top: 0; z-index: 100;
-    background: var(--surface); border-bottom: 1px solid var(--border);
+    background: var(--surface);
     display: flex; flex-direction: column;
   }
   /* ROW 1 — brand + metrics + primary action */
   .topbar-row1 {
     display: flex; align-items: center; padding: 0 20px; height: 50px; gap: 0;
-    border-bottom: 1px solid var(--border);
   }
   #topbar img { height: 22px; filter: brightness(0) invert(1); flex-shrink: 0; margin-right: 14px; }
   #role-badge { flex-shrink: 0; }
@@ -1064,7 +1063,7 @@
   }
   /* Topbar */
   body.theme-light #topbar { background: #FFFFFF !important; }
-  body.theme-light .topbar-row1 { background: #FFFFFF; border-bottom-color: var(--border); }
+  body.theme-light .topbar-row1 { background: #FFFFFF; }
   body.theme-light .topbar-row2 { background: #FFFFFF; }
   body.theme-light #topbar img { filter: brightness(0); }
   body.theme-light #loading-screen img { filter: brightness(0); }
