@@ -85,7 +85,30 @@
   @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
   .counter-val { color: var(--text); font-weight: 700; font-size: 14px; }
   .live-sep { display: none; }
-  .topbar-right { margin-left: auto; display: flex; align-items: center; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  /* NOTIFICATION BELL */
+  #notif-bell {
+    position: relative; background: transparent; border: 1px solid transparent;
+    border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 15px;
+    line-height: 1; display: flex; align-items: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  #notif-bell:hover { background: rgba(255,255,255,0.05); border-color: var(--border); }
+  #notif-bell.has-new { animation: bell-ring 0.6s ease 0s 1; }
+  @keyframes bell-ring {
+    0%,100% { transform: rotate(0deg); }
+    20%     { transform: rotate(-15deg); }
+    40%     { transform: rotate(15deg); }
+    60%     { transform: rotate(-10deg); }
+    80%     { transform: rotate(8deg); }
+  }
+  .notif-badge {
+    position: absolute; top: 2px; right: 2px;
+    background: var(--red-bright); color: white;
+    font-family: var(--mono); font-size: 9px; font-weight: 700;
+    min-width: 15px; height: 15px; border-radius: 8px;
+    padding: 0 3px; line-height: 15px; text-align: center;
+  }
   /* WAR ROOM */
   #war-room-toggle {
     font-family: var(--display); font-size: 10px; font-weight: 900; letter-spacing: 0.12em;
@@ -648,7 +671,7 @@
 
   /* DASHBOARD */
   #dashboard {
-    position: fixed; inset: 0; z-index: 200;
+    position: fixed; top: 83px; left: 0; right: 0; bottom: 0; z-index: 200;
     background: var(--bg); display: none; flex-direction: column; overflow: hidden;
   }
   #dashboard.active { display: flex; }
@@ -821,7 +844,7 @@
 
   /* DOCUMENTATION */
   #docs {
-    position: fixed; inset: 0; z-index: 250;
+    position: fixed; top: 83px; left: 0; right: 0; bottom: 0; z-index: 250;
     background: var(--bg); display: none; flex-direction: column;
   }
   #docs.active { display: flex; }
@@ -964,7 +987,7 @@
 
   /* DATA EXPLORER */
   #data-explorer {
-    position: fixed; inset: 0; z-index: 200;
+    position: fixed; top: 83px; left: 0; right: 0; bottom: 0; z-index: 200;
     background: rgba(5,5,5,0.98);
     display: none; flex-direction: column;
     border: 1px solid var(--border);
@@ -1400,7 +1423,7 @@
 
   /* ─── KPI PANEL ─────────────────────────────────────────────────────────── */
   #kpi-panel {
-    position: fixed; inset: 0; z-index: 200;
+    position: fixed; top: 83px; left: 0; right: 0; bottom: 0; z-index: 200;
     background: var(--bg); display: none; flex-direction: column; overflow: hidden;
   }
   #kpi-panel.active { display: flex; }
@@ -1476,7 +1499,7 @@
 
   /* ─── CLIENTES PANEL ──────────────────────────────────────────────────────── */
   #clientes-panel {
-    position: fixed; inset: 0; z-index: 200;
+    position: fixed; top: 83px; left: 0; right: 0; bottom: 0; z-index: 200;
     background: var(--bg); display: none; flex-direction: column; overflow: hidden;
   }
   #clientes-panel.active { display: flex; }
@@ -2005,16 +2028,16 @@
   .tools-menu-trigger.open,
   .tools-menu-trigger:hover { color: var(--text) !important; background: rgba(255,255,255,0.06) !important; }
   .tools-dropdown {
-    position: absolute; top: 100%; left: 0; z-index: 600;
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 600;
     background: var(--surface); border: 1px solid var(--border);
-    min-width: 185px; flex-direction: column;
-    padding: 4px; box-shadow: var(--shadow-lg);
+    border-radius: 10px; min-width: 185px; flex-direction: column;
+    padding: 6px; box-shadow: var(--shadow-lg);
     display: none;
   }
   .tools-dropdown.open { display: flex; }
   .td-item {
     font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-    padding: 8px 12px; background: transparent; border: none; text-align: left;
+    padding: 8px 12px; background: transparent; border: none; border-radius: 6px; text-align: left;
     color: var(--muted); cursor: pointer; transition: all 0.12s; white-space: nowrap; width: 100%;
   }
   .td-item:hover { background: var(--surface2); color: var(--text); }
@@ -2085,6 +2108,10 @@
       <span class="counter-val" id="review-count" style="color:var(--amber-bright)">—</span>
     </div>
     <div class="topbar-right">
+      <button id="notif-bell" onclick="clearBellAndScroll()" title="Alertas nuevas">
+        🔔
+        <span id="notif-badge" class="notif-badge" style="display:none">0</span>
+      </button>
       <button id="war-room-toggle" onclick="toggleWarRoom()">⬛ WAR ROOM</button>
     </div>
   </div>
@@ -3188,6 +3215,28 @@ function runAlertEngine() {
   const critCount = alerts.filter(a => a.severity === 'critical').length;
 }
 
+let _bellSeenCount = 0;
+function updateBell(newCount) {
+  const unseen = Math.max(0, newCount - _bellSeenCount);
+  const badge = document.getElementById('notif-badge');
+  const bell = document.getElementById('notif-bell');
+  if (!badge || !bell) return;
+  if (unseen > 0) {
+    badge.textContent = unseen > 9 ? '9+' : unseen;
+    badge.style.display = 'block';
+    bell.classList.add('has-new');
+    setTimeout(() => bell.classList.remove('has-new'), 700);
+  } else {
+    badge.style.display = 'none';
+  }
+}
+function clearBellAndScroll() {
+  const alertsPanel = document.getElementById('alerts-panel');
+  if (alertsPanel) alertsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  _bellSeenCount = (MODEL.alertsGenerated || []).length;
+  const badge = document.getElementById('notif-badge');
+  if (badge) badge.style.display = 'none';
+}
 function renderAlerts(alerts) {
   const el = document.getElementById('alerts-container');
   // CS only sees ticket-related alerts
@@ -3196,6 +3245,7 @@ function renderAlerts(alerts) {
     visible = alerts.filter(a => a.isTicketAlert);
   }
   document.getElementById('alerts-count').textContent = visible.length;
+  updateBell(visible.length);
   if (!visible.length) { el.innerHTML = '<div class="empty-state">Sin alertas en tu área</div>'; return; }
   alerts = visible;
 
