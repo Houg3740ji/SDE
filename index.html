@@ -1056,7 +1056,7 @@
   body.theme-light .panel-header { background: #FFFFFF; border-bottom-color: var(--border); }
   body.theme-light .panel-badge { background: #F1F5F9; color: var(--muted); }
   /* Alerts */
-  body.theme-light #alerts-panel, body.theme-light #alerts-panel .panel-header { background: #F8FAFC; }
+  body.theme-light #alerts-panel .panel-content { background: #F8FAFC; }
   body.theme-light .alert-item { background: #FFFFFF; border-color: var(--border); }
   /* Tickets */
   body.theme-light .ticket-col { background: var(--bg); }
@@ -2024,9 +2024,8 @@
   #inventory-panel.panel-collapsed .panel-collapse-btn {
     writing-mode: horizontal-tb; transform: rotate(90deg);
   }
-  /* Match alerts panel content bg to card bg, always opaque */
-  #alerts-panel { background: var(--surface); }
-  #alerts-panel .panel-header { background: var(--surface); }
+  /* Alerts content bg matches card bg; header stays default like all other panels */
+  #alerts-panel .panel-content { background: var(--surface); }
 
   /* ── CS ACTION ROW ───────────────────────────────────────────────────────── */
   #cs-action-row {
