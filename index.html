@@ -52,6 +52,37 @@
     min-height: 100vh;
   }
 
+  /* LOGIN SCREEN */
+  #login-screen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 10000; gap: 0;
+  }
+  #login-screen img { width: 100px; opacity: 0.9; filter: brightness(0) invert(1); margin-bottom: 32px; }
+  .login-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 36px 40px; width: 380px; max-width: 95vw;
+    display: flex; flex-direction: column; gap: 18px; box-shadow: var(--shadow-lg);
+  }
+  .login-title { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); text-align: center; }
+  .login-input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 11px 14px; font-size: 13px;
+    color: var(--text); font-family: var(--mono); outline: none;
+    transition: border-color 0.15s;
+  }
+  .login-input:focus { border-color: var(--green); }
+  .login-btn {
+    width: 100%; padding: 12px; background: var(--green-dim); border: 1px solid var(--green);
+    border-radius: var(--radius-sm); color: var(--green-bright); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.1em; cursor: pointer; font-family: var(--mono);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .login-btn:hover { background: rgba(52,211,153,0.2); border-color: var(--green-bright); }
+  .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .login-error { font-size: 11px; color: var(--red-bright); text-align: center; min-height: 16px; }
+  .login-separator { border: none; border-top: 1px solid var(--border); margin: 0; }
+
   /* LOADING */
   #loading-screen {
     position: fixed; inset: 0; background: var(--bg);
@@ -2078,8 +2109,23 @@
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <img src="https://scuffers.com/cdn/shop/files/Logo_Scuffers_Blanco_500x.png" alt="Scuffers">
+  <div class="login-box">
+    <div class="login-title">OPS BRAIN — ACCESO RESTRINGIDO</div>
+    <hr class="login-separator">
+    <input class="login-input" id="login-user" type="text" placeholder="Usuario" autocomplete="username"
+      onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
+    <input class="login-input" id="login-pass" type="password" placeholder="Contraseña" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')attemptLogin()">
+    <button class="login-btn" id="login-btn" onclick="attemptLogin()">ENTRAR →</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
 <!-- LOADING -->
-<div id="loading-screen">
+<div id="loading-screen" style="display:none">
   <img src="https://scuffers.com/cdn/shop/files/Logo_Scuffers_Blanco_500x.png" alt="Scuffers">
   <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
   <div class="loading-text" id="loading-text">INICIALIZANDO OPS BRAIN...</div>
@@ -2090,7 +2136,8 @@
   <!-- ROW 1: brand + key metrics + primary action -->
   <div class="topbar-row1">
     <img src="https://scuffers.com/cdn/shop/files/Logo_Scuffers_Blanco_500x.png" alt="Scuffers">
-    <div id="role-badge" class="role-badge role-admin" onclick="openRolesPanel()">👤 ADMIN ▾</div>
+    <div id="role-badge" class="role-badge role-admin" style="cursor:default">👤 <span id="role-badge-name">—</span></div>
+    <button id="logout-btn" onclick="logout()" title="Cerrar sesión" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:0.08em;padding:3px 9px;cursor:pointer;font-family:var(--mono);transition:color 0.15s,border-color 0.15s" onmouseenter="this.style.color='var(--red-bright)';this.style.borderColor='var(--red-bright)'" onmouseleave="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">SALIR</button>
     <div class="topbar-divider"></div>
     <div class="live-counter">
       <div class="live-dot"></div>
@@ -2234,71 +2281,6 @@
     <div id="inventory-container"></div>
   </div>
 
-</div>
-
-<!-- ROLES OVERLAY + PANEL -->
-<div class="roles-overlay" id="roles-overlay" onclick="closeRolesPanel()"></div>
-<div id="roles-panel">
-  <div class="roles-header">
-    <div class="roles-header-title">👤 Gestión de Acceso</div>
-    <button class="roles-close" onclick="closeRolesPanel()">✕ CERRAR</button>
-  </div>
-  <div class="roles-subtitle">Selecciona el rol para simular la experiencia de cada usuario dentro de Scuffers Ops Brain. Los jueces pueden cambiar entre vistas en tiempo real.</div>
-  <div class="roles-list">
-
-    <div class="role-card admin" id="role-card-admin" onclick="setRole('admin')">
-      <div class="role-card-top">
-        <span class="role-icon">🛡</span>
-        <span class="role-name">Administrador</span>
-        <span class="role-active-badge" id="active-badge-admin" style="display:none">ACTIVO</span>
-      </div>
-      <div class="role-desc">Visibilidad y control total. Gestiona campañas, inventario, tickets, datos y tiene acceso al War Room AI y al Dashboard en tiempo real.</div>
-      <div class="role-perms">
-        <div class="role-perm yes">Motor de alertas completo (campañas, stock, VIPs)</div>
-        <div class="role-perm yes">Cola de tickets completa + borradores IA</div>
-        <div class="role-perm yes">Panel de riesgo de inventario</div>
-        <div class="role-perm yes">War Room AI + Dashboard + Explorador de datos</div>
-        <div class="role-perm yes">Datos de negocio: LTV, campañas, revenue</div>
-      </div>
-      <button class="role-select-btn" onclick="event.stopPropagation();setRole('admin')">ACTIVAR ESTE ROL →</button>
-    </div>
-
-    <div class="role-card cs" id="role-card-cs" onclick="setRole('cs')">
-      <div class="role-card-top">
-        <span class="role-icon">🎯</span>
-        <span class="role-name">Customer Success</span>
-        <span class="role-active-badge" id="active-badge-cs" style="display:none">ACTIVO</span>
-      </div>
-      <div class="role-desc">Gestiona la relación con el cliente. Ve ambas colas de tickets, puede aprobar, rechazar y editar borradores antes de enviarlos. Sin acceso a datos operacionales del negocio.</div>
-      <div class="role-perms">
-        <div class="role-perm yes">Alertas de tickets (VIP urgentes, retrasos)</div>
-        <div class="role-perm yes">Cola AUTO + cola HUMANO completa</div>
-        <div class="role-perm yes">Aprobar / Rechazar / Editar borradores IA</div>
-        <div class="role-perm no">Panel de inventario y campañas</div>
-        <div class="role-perm no">War Room, Dashboard, Explorador de datos</div>
-      </div>
-      <button class="role-select-btn" onclick="event.stopPropagation();setRole('cs')">ACTIVAR ESTE ROL →</button>
-    </div>
-
-    <div class="role-card agent" id="role-card-agent" onclick="setRole('agent')">
-      <div class="role-card-top">
-        <span class="role-icon">💬</span>
-        <span class="role-name">Agente de Soporte</span>
-        <span class="role-active-badge" id="active-badge-agent" style="display:none">ACTIVO</span>
-      </div>
-      <div class="role-desc">Ejecuta las respuestas generadas por la IA. Ve los tickets auto-resueltos como decisiones finales. Sin contexto de negocio ni datos de clientes.</div>
-      <div class="role-perms">
-        <div class="role-perm yes">Tickets auto-resueltos con respuesta enviada</div>
-        <div class="role-perm no">LTV de cliente, datos de pedido o revenue</div>
-        <div class="role-perm no">Cola de revisión humana</div>
-        <div class="role-perm no">Alertas, inventario, campañas</div>
-        <div class="role-perm no">War Room, Dashboard, herramientas admin</div>
-      </div>
-      <button class="role-select-btn" onclick="event.stopPropagation();setRole('agent')">ACTIVAR ESTE ROL →</button>
-    </div>
-
-  </div>
-  <button class="roles-demo-btn" onclick="setRole('admin');closeRolesPanel()">⬛ VOLVER A MODO DEMO COMPLETO (ADMIN)</button>
 </div>
 
 <!-- CONFIGURACIÓN PANEL -->
@@ -2994,6 +2976,112 @@ function toggleTheme() {
     if (dashboardOpen) { Object.keys(chartInstances).forEach(id => { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }); renderAllCharts(); }
   }
 }
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+const AUTH_SUPA_URL = 'https://rdbtunqmagyqbdheutmv.supabase.co';
+const AUTH_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkYnR1bnFtYWd5cWJkaGV1dG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMzg1ODEsImV4cCI6MjA5MzkxNDU4MX0.jPskoAavrorOazPaBjnkDxoZHF2Lp0U5tWSaSR4j2YY';
+
+let sessionRole = null; // 'admin' | 'empleado' — set after successful login
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function attemptLogin() {
+  const username = document.getElementById('login-user').value.trim().toLowerCase();
+  const password = document.getElementById('login-pass').value;
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-btn');
+
+  if (!username || !password) { errEl.textContent = 'Introduce usuario y contraseña.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'VERIFICANDO...';
+  errEl.textContent = '';
+
+  try {
+    const hash = await sha256(password);
+    const url  = `${AUTH_SUPA_URL}/rest/v1/app_users?username=eq.${encodeURIComponent(username)}&password_hash=eq.${encodeURIComponent(hash)}&select=username,role`;
+    const res  = await fetch(url, {
+      headers: { 'apikey': AUTH_SUPA_KEY, 'Authorization': `Bearer ${AUTH_SUPA_KEY}` }
+    });
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      errEl.textContent = 'Usuario o contraseña incorrectos.';
+      btn.disabled = false; btn.textContent = 'ENTRAR →';
+      return;
+    }
+
+    const user = data[0];
+    sessionRole = user.role;
+    sessionStorage.setItem('ops_session', JSON.stringify({ username: user.username, role: user.role }));
+
+    // Hide login, start app
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('loading-screen').style.display = 'flex';
+    boot();
+  } catch(e) {
+    errEl.textContent = 'Error de conexión. Inténtalo de nuevo.';
+    btn.disabled = false; btn.textContent = 'ENTRAR →';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('ops_session');
+  sessionRole = null;
+  // Hide app, show login
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('stock-ticker').style.display = 'none';
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').textContent = 'ENTRAR →';
+}
+
+function applySessionRestrictions() {
+  const isEmpleado = sessionRole === 'empleado';
+
+  // Show username in badge
+  const session = JSON.parse(sessionStorage.getItem('ops_session') || '{}');
+  const nameEl = document.getElementById('role-badge-name');
+  if (nameEl) nameEl.textContent = (session.username || '').toUpperCase();
+
+  // empleado: hide Configuración, Explorador de datos, Slack
+  const apiBtn  = document.getElementById('api-key-btn');
+  const deBtn   = document.querySelector('.td-item[onclick*="openDataExplorer"]');
+  const slackBtn = document.getElementById('slack-btn');
+  const csSlackBtn = document.querySelector('#cs-action-row .tb-slack');
+
+  if (apiBtn)     apiBtn.style.display     = isEmpleado ? 'none' : '';
+  if (deBtn)      deBtn.style.display      = isEmpleado ? 'none' : '';
+  if (slackBtn)   slackBtn.style.display   = isEmpleado ? 'none' : '';
+  if (csSlackBtn) csSlackBtn.style.display = isEmpleado ? 'none' : '';
+}
+
+// Check existing session on page load
+(function checkSession() {
+  const stored = sessionStorage.getItem('ops_session');
+  if (stored) {
+    try {
+      const s = JSON.parse(stored);
+      if (s.role && s.username) {
+        sessionRole = s.role;
+        // Hide login, show loading and boot
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('loading-screen').style.display = 'flex';
+        // boot() will be called after DOM ready via the call at the bottom of the script
+        return;
+      }
+    } catch(e) {}
+  }
+  // No valid session — show login, keep loading hidden
+  // login-screen is already visible by default
+})();
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 const DATA = { inventory: [], tickets: [], orders: [], customers: [], campaigns: [], orderItems: [] };
@@ -4354,35 +4442,21 @@ const ROLE_CONFIG = {
   },
 };
 
-function openRolesPanel() {
-  document.getElementById('roles-panel').classList.add('open');
-  document.getElementById('roles-overlay').classList.add('open');
-}
-function closeRolesPanel() {
-  document.getElementById('roles-panel').classList.remove('open');
-  document.getElementById('roles-overlay').classList.remove('open');
-}
-
+function openRolesPanel() { /* removed — access now managed by login */ }
+function closeRolesPanel() { /* removed */ }
 function setRole(role) {
   currentRole = role;
   applyRoleVisibility();
   renderAlerts(MODEL.alertsGenerated);
   renderTickets();
-  // Update role cards active state
-  ['admin','cs','agent'].forEach(r => {
-    document.getElementById(`role-card-${r}`).classList.toggle('active', r === role);
-    document.getElementById(`active-badge-${r}`).style.display = r === role ? 'block' : 'none';
-  });
-  closeRolesPanel();
 }
 
 function applyRoleVisibility() {
   const cfg = ROLE_CONFIG[currentRole];
 
-  // Badge
+  // Badge — only update class, text is managed by applySessionRestrictions
   const badge = document.getElementById('role-badge');
-  badge.textContent = cfg.label + ' ▾';
-  badge.className = `role-badge ${cfg.badgeClass}`;
+  if (badge) badge.className = `role-badge ${cfg.badgeClass}`;
 
   // Alerts panel header
   document.querySelector('#alerts-panel .panel-header').childNodes[0].textContent = cfg.alertsTitle + ' ';
@@ -5751,6 +5825,7 @@ async function boot() {
     document.getElementById('stock-ticker').style.display = 'flex';
     document.getElementById('main').style.display = 'grid';
     applyRoleVisibility(); // apply default admin role visibility
+    applySessionRestrictions(); // apply login-based restrictions
     updateStockTicker();
     updateHealthScore();
     loadShippingData().then(() => { refreshAutoResponses(); updateHealthScore(); });
@@ -5781,7 +5856,8 @@ async function boot() {
   setTimeout(showShiftBriefing, 2000);
 }
 
-boot();
+// Only boot if session already exists (restored from sessionStorage); otherwise login screen handles it
+if (sessionRole) boot();
 
 // ─── SHOPIFY LIVE POLLER ──────────────────────────────────────────────────────
 let _shopifyLastUpdated = null;
