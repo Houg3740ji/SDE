@@ -74,7 +74,7 @@
     display: flex; align-items: center; padding: 0 20px; height: 50px; gap: 0;
   }
   #topbar img { height: 22px; filter: brightness(0) invert(1); flex-shrink: 0; margin-right: 14px; }
-  #role-badge { flex-shrink: 0; }
+  #role-badge { flex-shrink: 0; margin-left: 2px; margin-right: 12px; }
   .topbar-divider { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; margin: 0 18px; }
   .live-counter {
     display: flex; align-items: center; gap: 6px;
@@ -287,6 +287,8 @@
   }
   .session-bar-wrap { width: 54px; height: 3px; background: var(--surface2); overflow: hidden; }
   .session-bar-fill { height: 100%; background: var(--green); transition: width 0.5s ease; width: 0%; }
+  #session-progress-wrap .session-bar-wrap { display: none; }
+  #session-progress-wrap .session-progress-val { font-size: 11px; }
 
   /* ── MICRO-FEEDBACK BURST ────────────────────────────────────────────────── */
   .action-burst {
@@ -1078,7 +1080,7 @@
   body.theme-light .role-badge.role-admin { background: rgba(21,128,61,0.08); border-color: #A7F3D0; color: var(--green); }
   body.theme-light .role-badge.role-cs { background: rgba(29,78,216,0.07); border-color: #BFDBFE; color: #1D4ED8; }
   body.theme-light .role-badge.role-agent { background: #F1F5F9; border-color: var(--border); color: var(--muted); }
-  body.theme-light #health-score { background: #F8FAFC; border-color: var(--border); }
+  body.theme-light #health-score { background: transparent; }
   /* Stock ticker */
   body.theme-light #stock-ticker { background: #F1F5F9; border-bottom-color: var(--border); }
   body.theme-light .stk-dot { background: var(--green-bright); }
@@ -1260,21 +1262,17 @@
 
   /* ─── HEALTH SCORE ──────────────────────────────────────────────────────── */
   #health-score {
-    display: flex; align-items: center; gap: 6px;
-    padding: 3px 10px; border: 1px solid var(--border);
-    background: var(--surface); cursor: default; transition: all 0.3s;
-    flex-shrink: 0;
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 10px; cursor: default; flex-shrink: 0;
   }
   #health-score-label {
-    font-family: var(--display); font-size: 9px; font-weight: 900;
-    letter-spacing: 0.15em; color: var(--muted);
+    font-size: 9px; font-weight: 400; letter-spacing: 0.05em; color: var(--muted);
   }
   #health-score-val {
-    font-family: var(--display); font-size: 18px; font-weight: 900;
-    letter-spacing: 0.02em; line-height: 1; transition: color 0.4s;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em; line-height: 1; transition: color 0.4s;
   }
   #health-score-dot {
-    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
     transition: background 0.4s;
   }
 
@@ -1923,8 +1921,8 @@
   .chart-title        { letter-spacing: 0.04em; font-size: 12px; font-weight: 600; }
 
   /* Health score */
-  #health-score-label { letter-spacing: 0.04em; font-size: 10px; font-weight: 600; }
-  #health-score-val   { font-size: 20px; font-weight: 700; letter-spacing: 0; }
+  #health-score-label { letter-spacing: 0.05em; font-size: 9px; font-weight: 400; }
+  #health-score-val   { font-size: 11px; font-weight: 700; letter-spacing: 0.03em; }
 
   /* Logistics */
   .ship-eta           { font-size: 11px; letter-spacing: 0; }
@@ -2050,7 +2048,7 @@
   }
 
   /* cs-action-row is now inside topbar-row2 */
-  #cs-action-row { display: none; align-items: center; height: 100%; }
+  #cs-action-row { display: none; align-items: center; height: 100%; gap: 4px; }
   #cs-action-row.visible { display: flex; }
 
 </style>
