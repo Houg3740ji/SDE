@@ -160,6 +160,15 @@
   .alert-badge.info { background: var(--green); color: white; }
   .alert-msg { font-size: 11px; color: var(--text); line-height: 1.5; margin-bottom: 8px; }
   .alert-meta { font-size: 10px; color: var(--muted); }
+  .dismiss-btn {
+    position: absolute; top: 6px; right: 6px; width: 18px; height: 18px;
+    border: none; background: transparent; color: var(--muted); cursor: pointer;
+    font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; transition: background 0.15s, color 0.15s; opacity: 0;
+  }
+  .alert-item:hover .dismiss-btn,
+  .ticket-card:hover .dismiss-btn { opacity: 1; }
+  .dismiss-btn:hover { background: rgba(192,57,43,0.2); color: var(--red-bright); }
   .alert-action {
     margin-top: 8px; font-family: var(--display); font-size: 11px; font-weight: 700;
     letter-spacing: 0.15em; text-transform: uppercase; padding: 5px 10px;
@@ -1292,6 +1301,23 @@
     background: transparent; color: var(--muted); cursor: pointer; text-align: center;
   }
   .hist-clear:hover { border-color: var(--red); color: var(--red-bright); }
+  .hist-tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .hist-tab {
+    flex: 1; padding: 8px 4px; font-family: var(--display); font-size: 9px; font-weight: 900;
+    letter-spacing: 0.1em; border: none; background: transparent; color: var(--muted);
+    cursor: pointer; transition: color 0.15s; border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .hist-tab.active { color: var(--text); border-bottom-color: var(--green-bright); }
+  .hist-tab-panel { display: none; flex-direction: column; overflow: hidden; }
+  .hist-tab-panel.active { display: flex; flex: 1; }
+  .hist-restore-btn {
+    font-family: var(--display); font-size: 8px; font-weight: 900; letter-spacing: 0.1em;
+    border: 1px solid var(--green); background: transparent; color: var(--green-bright);
+    cursor: pointer; padding: 2px 7px; margin-left: auto;
+  }
+  .hist-restore-btn:hover { background: var(--green); color: white; }
+  .hist-entry.dismissed { border-left: 3px solid var(--muted); opacity: 0.7; }
 
   /* ─── LOGISTICS WIDGET ──────────────────────────────────────────────────── */
   #logistics-widget {
@@ -3168,6 +3194,7 @@ function renderAlerts(alerts) {
 
   el.innerHTML = alerts.map((a, i) => `
     <div class="alert-item ${esc(a.severity)}">
+      <button class="dismiss-btn" onclick="dismissAlert(${i})" title="Descartar alerta">×</button>
       <div><span class="alert-badge ${esc(a.severity)}">${esc(a.severity).toUpperCase()}</span></div>
       <div style="font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:4px">${esc(a.title)}</div>
       <div class="alert-msg">${esc(a.msg)}</div>
@@ -3185,6 +3212,57 @@ function alertAction(ref, severity) {
   } else {
     sendWarRoomChip(`Dame información sobre ${ref} y dime cómo proceder`);
   }
+}
+
+function dismissAlert(i) {
+  // `i` is relative to the currently visible array, which renderAlerts() builds from MODEL.alertsGenerated
+  let visible = MODEL.alertsGenerated;
+  if (currentRole === 'cs') visible = MODEL.alertsGenerated.filter(a => a.isTicketAlert);
+  const alert = visible[i];
+  if (!alert) return;
+  // Save to dismissed store with timestamp
+  dismissedAlerts.unshift({ ...alert, dismissedAt: Date.now() });
+  if (dismissedAlerts.length > 100) dismissedAlerts.length = 100;
+  try { localStorage.setItem('scuffers_dismissed_alerts', JSON.stringify(dismissedAlerts)); } catch(e) {}
+  // Remove from active model
+  const idx = MODEL.alertsGenerated.indexOf(alert);
+  if (idx !== -1) MODEL.alertsGenerated.splice(idx, 1);
+  renderAlerts(MODEL.alertsGenerated);
+  // Refresh historial if open
+  if (document.getElementById('historial-panel').classList.contains('open')) renderHistorial();
+}
+
+function restoreAlert(i) {
+  const alert = dismissedAlerts[i];
+  if (!alert) return;
+  dismissedAlerts.splice(i, 1);
+  try { localStorage.setItem('scuffers_dismissed_alerts', JSON.stringify(dismissedAlerts)); } catch(e) {}
+  delete alert.dismissedAt;
+  MODEL.alertsGenerated.unshift(alert);
+  renderAlerts(MODEL.alertsGenerated);
+  renderHistorial();
+}
+
+function dismissAutoTicket(ticketId) {
+  const ticket = DATA.tickets.find(t => t.ticket_id === ticketId);
+  if (!ticket) return;
+  dismissedAutoTickets.unshift({ ...ticket, dismissedAt: Date.now() });
+  if (dismissedAutoTickets.length > 100) dismissedAutoTickets.length = 100;
+  try { localStorage.setItem('scuffers_dismissed_tickets', JSON.stringify(dismissedAutoTickets)); } catch(e) {}
+  // Hide the card with a fade
+  const card = document.getElementById(`tc-${ticketId}`);
+  if (card) { card.style.transition = 'opacity 0.2s'; card.style.opacity = '0'; setTimeout(() => renderTickets(), 220); }
+  else renderTickets();
+  if (document.getElementById('historial-panel').classList.contains('open')) renderHistorial();
+}
+
+function restoreAutoTicket(i) {
+  const ticket = dismissedAutoTickets[i];
+  if (!ticket) return;
+  dismissedAutoTickets.splice(i, 1);
+  try { localStorage.setItem('scuffers_dismissed_tickets', JSON.stringify(dismissedAutoTickets)); } catch(e) {}
+  renderHistorial();
+  // Note: ticket reappears on next data refresh; no need to force re-render since DATA.tickets is the source
 }
 
 // ─── TICKET CLASSIFICATION ENGINE ─────────────────────────────────────────────
@@ -3292,7 +3370,8 @@ function classifyAllTickets() {
 }
 
 function renderTickets() {
-  const autoTickets = MODEL.ticketClassifications.filter(t => t.isAuto);
+  const dismissedAutoIds = new Set(dismissedAutoTickets.map(t => t.ticket_id));
+  const autoTickets = MODEL.ticketClassifications.filter(t => t.isAuto && !dismissedAutoIds.has(t.ticket_id));
   const humanTickets = MODEL.ticketClassifications.filter(t => !t.isAuto);
 
   // Sort human tickets: VIP urgent first
@@ -3326,8 +3405,10 @@ function renderTickets() {
       const showBiz = currentRole !== 'agent';
       const ltv = showBiz && t.customer ? `LTV ${Math.round(t.customer.customer_lifetime_value)}€` : '';
       const orderId = showBiz ? `${esc(t.ticket_id)} · ${esc(t.order_id)}` : esc(t.ticket_id);
+      const tid = esc(t.ticket_id);
       return `
-        <div class="ticket-card" id="tc-${esc(t.ticket_id)}">
+        <div class="ticket-card" id="tc-${tid}" style="position:relative">
+          <button class="dismiss-btn" onclick="dismissAutoTicket('${tid}')" title="Archivar ticket">×</button>
           <div class="ticket-top">
             <span class="ticket-id">${orderId}</span>
             <span class="ticket-urgency urgency-${esc(t.support_ticket_urgency)}">${esc(t.support_ticket_urgency).toUpperCase()}</span>
@@ -3337,7 +3418,7 @@ function renderTickets() {
             <span class="ticket-channel">${esc(t.channel)}</span>
             ${ltv ? `<span style="color:var(--muted);margin-left:8px">${esc(ltv)}</span>` : ''}
           </div>
-          ${showBiz ? `<div id="ship-${esc(t.ticket_id)}"><span class="ship-loading">cargando envío · · ·</span></div>` : ''}
+          ${showBiz ? `<div id="ship-${tid}"><span class="ship-loading">cargando envío · · ·</span></div>` : ''}
           <div class="ai-response">
             <div class="ai-response-label">✓ RESPUESTA ENVIADA</div>
             ${esc(t.autoResponse)}
@@ -4858,6 +4939,14 @@ const supaClient = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA
 let decisionLog = [];
 try { decisionLog = JSON.parse(localStorage.getItem('scuffers_decisions') || '[]'); } catch(e) {}
 
+let dismissedAlerts = [];
+try { dismissedAlerts = JSON.parse(localStorage.getItem('scuffers_dismissed_alerts') || '[]'); } catch(e) {}
+
+let dismissedAutoTickets = [];
+try { dismissedAutoTickets = JSON.parse(localStorage.getItem('scuffers_dismissed_tickets') || '[]'); } catch(e) {}
+
+let _activeHistTab = 'decisiones';
+
 const _loggedDecisions = new Set();
 async function logDecision(ticketId, action) {
   const key = `${ticketId}:${action}`;
@@ -4907,14 +4996,34 @@ function closeHistorial() {
   document.getElementById('historial-panel').classList.remove('open');
 }
 function clearHistorial() {
-  if (!confirm('¿Borrar todo el historial?')) return;
+  if (!confirm('¿Borrar todo el historial de decisiones?')) return;
   decisionLog = [];
   try { localStorage.removeItem('scuffers_decisions'); } catch(e) {}
   renderHistorial();
 }
+function clearDismissedAlerts() {
+  if (!confirm('¿Limpiar alertas descartadas?')) return;
+  dismissedAlerts = [];
+  try { localStorage.removeItem('scuffers_dismissed_alerts'); } catch(e) {}
+  renderHistorial();
+}
+function clearDismissedTickets() {
+  if (!confirm('¿Limpiar tickets archivados?')) return;
+  dismissedAutoTickets = [];
+  try { localStorage.removeItem('scuffers_dismissed_tickets'); } catch(e) {}
+  renderHistorial();
+}
+
+function switchHistTab(tab) {
+  _activeHistTab = tab;
+  ['decisiones','alertas','auto'].forEach(t => {
+    document.getElementById(`htab-${t}`).classList.toggle('active', t === tab);
+    document.getElementById(`htab-panel-${t}`).classList.toggle('active', t === tab);
+  });
+}
 
 async function renderHistorial() {
-  // Try to load from Supabase, fallback to localStorage
+  // ── TAB: DECISIONES ───────────────────────────────────────────────────────
   let log = decisionLog;
   if (supaClient) {
     try {
@@ -4946,29 +5055,74 @@ async function renderHistorial() {
   const list = document.getElementById('hist-list');
   if (!log.length) {
     list.innerHTML = '<div class="hist-empty">Sin decisiones registradas.<br>Aprueba o rechaza tickets para verlos aquí.</div>';
-    return;
+  } else {
+    list.innerHTML = log.map(e => {
+      const time = new Date(e.timestamp).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      const date = new Date(e.timestamp).toLocaleDateString('es', { day:'numeric', month:'short' });
+      const urg = esc(e.urgency || '?').toUpperCase();
+      const actionCls = e.action === 'approved' ? 'approved' : 'rejected';
+      return `
+        <div class="hist-entry ${actionCls}">
+          <div class="hist-entry-top">
+            <span class="hist-entry-id">${esc(e.ticketId)} · ${esc(e.orderId)}</span>
+            <span class="hist-entry-action ${actionCls}">${actionCls === 'approved' ? '✓ APROBADO' : '✗ RECHAZADO'}</span>
+            <span class="hist-entry-time">${esc(date)} ${esc(time)}</span>
+          </div>
+          <div class="hist-entry-msg">"${esc(e.message)}"</div>
+          <div class="hist-entry-meta">
+            <span>${urg}</span>
+            <span>${esc(e.channel)}</span>
+            ${e.isVip ? `<span style="color:var(--amber-bright)">⭐ VIP ${esc(String(e.ltv))}€</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
   }
 
-  list.innerHTML = log.map(e => {
-    const time = new Date(e.timestamp).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-    const date = new Date(e.timestamp).toLocaleDateString('es', { day:'numeric', month:'short' });
-    const urg = esc(e.urgency || '?').toUpperCase();
-    const actionCls = e.action === 'approved' ? 'approved' : 'rejected';
-    return `
-      <div class="hist-entry ${actionCls}">
-        <div class="hist-entry-top">
-          <span class="hist-entry-id">${esc(e.ticketId)} · ${esc(e.orderId)}</span>
-          <span class="hist-entry-action ${actionCls}">${actionCls === 'approved' ? '✓ APROBADO' : '✗ RECHAZADO'}</span>
-          <span class="hist-entry-time">${esc(date)} ${esc(time)}</span>
-        </div>
-        <div class="hist-entry-msg">"${esc(e.message)}"</div>
-        <div class="hist-entry-meta">
-          <span>${urg}</span>
-          <span>${esc(e.channel)}</span>
-          ${e.isVip ? `<span style="color:var(--amber-bright)">⭐ VIP ${esc(String(e.ltv))}€</span>` : ''}
-        </div>
-      </div>`;
-  }).join('');
+  // ── TAB: ALERTAS DESCARTADAS ──────────────────────────────────────────────
+  const alertList = document.getElementById('hist-alerts-list');
+  if (!dismissedAlerts.length) {
+    alertList.innerHTML = '<div class="hist-empty">No hay alertas descartadas.</div>';
+  } else {
+    alertList.innerHTML = dismissedAlerts.map((a, i) => {
+      const time = new Date(a.dismissedAt).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' });
+      const date = new Date(a.dismissedAt).toLocaleDateString('es', { day:'numeric', month:'short' });
+      return `
+        <div class="hist-entry dismissed">
+          <div class="hist-entry-top">
+            <span class="hist-entry-id">${esc(a.title)}</span>
+            <span class="hist-entry-action" style="background:rgba(100,116,139,0.2);color:var(--muted)">${esc(a.severity).toUpperCase()}</span>
+            <span class="hist-entry-time">${esc(date)} ${esc(time)}</span>
+            <button class="hist-restore-btn" onclick="restoreAlert(${i})">↩ RESTAURAR</button>
+          </div>
+          <div class="hist-entry-msg">${esc(a.msg)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── TAB: AUTO ARCHIVADOS ──────────────────────────────────────────────────
+  const autoList = document.getElementById('hist-auto-list');
+  if (!dismissedAutoTickets.length) {
+    autoList.innerHTML = '<div class="hist-empty">No hay tickets archivados.</div>';
+  } else {
+    autoList.innerHTML = dismissedAutoTickets.map((t, i) => {
+      const time = new Date(t.dismissedAt).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' });
+      const date = new Date(t.dismissedAt).toLocaleDateString('es', { day:'numeric', month:'short' });
+      return `
+        <div class="hist-entry dismissed">
+          <div class="hist-entry-top">
+            <span class="hist-entry-id">${esc(t.ticket_id)} · ${esc(t.order_id || '?')}</span>
+            <span class="hist-entry-action" style="background:rgba(100,116,139,0.2);color:var(--muted)">ARCHIVADO</span>
+            <span class="hist-entry-time">${esc(date)} ${esc(time)}</span>
+            <button class="hist-restore-btn" onclick="restoreAutoTicket(${i})">↩ RESTAURAR</button>
+          </div>
+          <div class="hist-entry-msg">${esc(t.support_ticket_message || '')}</div>
+          <div class="hist-entry-meta">
+            <span>${esc((t.support_ticket_urgency || '?').toUpperCase())}</span>
+            <span>${esc(t.channel || '?')}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
 }
 
 // ─── CLIENTES PANEL ───────────────────────────────────────────────────────────
@@ -6442,27 +6596,49 @@ async function syncInstagramTickets() {
 <div id="historial-panel">
   <div class="hist-header">
     <span style="font-size:16px">📋</span>
-    <span class="hist-title">HISTORIAL DE DECISIONES</span>
+    <span class="hist-title">HISTORIAL</span>
     <button class="hist-close" onclick="closeHistorial()">CERRAR ✕</button>
   </div>
-  <div class="hist-stats">
-    <div>
-      <div class="hist-stat-val app" id="hist-stat-app">0</div>
-      <div class="hist-stat-label">Aprobados</div>
-    </div>
-    <div>
-      <div class="hist-stat-val rej" id="hist-stat-rej">0</div>
-      <div class="hist-stat-label">Rechazados</div>
-    </div>
-    <div style="margin-left:auto;text-align:right">
-      <div class="hist-stat-val" id="hist-stat-total" style="color:var(--muted)">0</div>
-      <div class="hist-stat-label">Total (Supabase)</div>
-    </div>
+  <div class="hist-tabs">
+    <button class="hist-tab active" id="htab-decisiones" onclick="switchHistTab('decisiones')">DECISIONES</button>
+    <button class="hist-tab" id="htab-alertas" onclick="switchHistTab('alertas')">ALERTAS</button>
+    <button class="hist-tab" id="htab-auto" onclick="switchHistTab('auto')">AUTO</button>
   </div>
-  <div class="hist-list" id="hist-list">
-    <div class="hist-empty">Sin decisiones registradas.<br>Aprueba o rechaza tickets para verlos aquí.</div>
+  <!-- TAB: DECISIONES -->
+  <div class="hist-tab-panel active" id="htab-panel-decisiones" style="flex-direction:column">
+    <div class="hist-stats">
+      <div>
+        <div class="hist-stat-val app" id="hist-stat-app">0</div>
+        <div class="hist-stat-label">Aprobados</div>
+      </div>
+      <div>
+        <div class="hist-stat-val rej" id="hist-stat-rej">0</div>
+        <div class="hist-stat-label">Rechazados</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div class="hist-stat-val" id="hist-stat-total" style="color:var(--muted)">0</div>
+        <div class="hist-stat-label">Total (Supabase)</div>
+      </div>
+    </div>
+    <div class="hist-list" id="hist-list">
+      <div class="hist-empty">Sin decisiones registradas.<br>Aprueba o rechaza tickets para verlos aquí.</div>
+    </div>
+    <button class="hist-clear" onclick="clearHistorial()">🗑 LIMPIAR HISTORIAL</button>
   </div>
-  <button class="hist-clear" onclick="clearHistorial()">🗑 LIMPIAR HISTORIAL</button>
+  <!-- TAB: ALERTAS DESCARTADAS -->
+  <div class="hist-tab-panel" id="htab-panel-alertas" style="flex-direction:column">
+    <div class="hist-list" id="hist-alerts-list">
+      <div class="hist-empty">No hay alertas descartadas.</div>
+    </div>
+    <button class="hist-clear" onclick="clearDismissedAlerts()">🗑 LIMPIAR</button>
+  </div>
+  <!-- TAB: AUTO ARCHIVADOS -->
+  <div class="hist-tab-panel" id="htab-panel-auto" style="flex-direction:column">
+    <div class="hist-list" id="hist-auto-list">
+      <div class="hist-empty">No hay tickets archivados.</div>
+    </div>
+    <button class="hist-clear" onclick="clearDismissedTickets()">🗑 LIMPIAR</button>
+  </div>
 </div>
 
 <!-- BRIEFING MODAL -->
