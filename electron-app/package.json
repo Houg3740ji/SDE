@@ -1,0 +1,85 @@
+{
+  "name": "scuffers-ops-brain",
+  "version": "1.0.0",
+  "description": "Scuffers OPS Brain — Panel de operaciones en tiempo real",
+  "main": "main.js",
+  "author": "Scuffers",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8",
+    "jimp": "^1.6.1"
+  },
+  "build": {
+    "appId": "com.scuffers.opsbrain",
+    "productName": "Scuffers OPS Brain",
+    "copyright": "Copyright © 2026 Scuffers",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "splash.html",
+      "assets/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "signingHashAlgorithms": null,
+      "sign": null
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.business"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "assets/icon.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Scuffers OPS Brain"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Houg3740ji",
+      "repo": "SDE"
+    }
+  }
+}

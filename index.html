@@ -3350,6 +3350,18 @@ function updateMobileBadges() {
   if (sb) { sb.textContent = stockCrit;  sb.style.display = stockCrit  > 0 ? 'inline-block' : 'none'; }
 }
 
+// ─── ELECTRON BRIDGE ──────────────────────────────────────────────────────────
+let _prevAlertCount = 0;
+if (window.electronBridge) {
+  // Show update banners inside the web app
+  window.electronBridge.onUpdateAvailable(() => {
+    showToast('🔄 Nueva versión disponible — descargando en background...');
+  });
+  window.electronBridge.onUpdateDownloaded(() => {
+    showToast('✅ Actualización lista — se instalará al cerrar la app.');
+  });
+}
+
 // ─── STATE ────────────────────────────────────────────────────────────────────
 const DATA = { inventory: [], tickets: [], orders: [], customers: [], campaigns: [], orderItems: [] };
 const MODEL = { byOrder: {}, byCustomer: {}, bySku: {}, alertsGenerated: [], ticketClassifications: [], shipping: {} };
@@ -3594,6 +3606,16 @@ function renderAlerts(alerts) {
   document.getElementById('alerts-count').textContent = visible.length;
   updateBell(visible.length);
   updateMobileBadges();
+  // ── Electron native integration ──
+  if (window.electronBridge) {
+    window.electronBridge.setBadge(visible.length);
+    // Notify on new critical alerts
+    const criticals = visible.filter(a => a.severity === 'critical');
+    if (criticals.length > 0 && visible.length > (_prevAlertCount || 0)) {
+      window.electronBridge.notify('⚠ Alerta crítica — OPS Brain', criticals[0].title);
+    }
+    _prevAlertCount = visible.length;
+  }
   if (!visible.length) { el.innerHTML = '<div class="empty-state">Sin alertas en tu área</div>'; return; }
   alerts = visible;
 
