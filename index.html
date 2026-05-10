@@ -6411,12 +6411,10 @@ function shopifyHeaders() {
 
 function openConfig() {
   // Populate fields from storage
-  const gKey   = _cfgGet('spd_groq_key');
   const shUrl  = _cfgGet('spd_shopify_url');
   const shTok  = _cfgGet('spd_shopify_token');
   const eTok   = _cfgGet('spd_email_token');
   const igTok  = _cfgGet('spd_ig_token');
-  document.getElementById('cfg-groq-key').value      = gKey;
   document.getElementById('cfg-shopify-url').value   = shUrl;
   document.getElementById('cfg-shopify-token').value = shTok;
   document.getElementById('cfg-email-token').value   = eTok;
@@ -6430,15 +6428,14 @@ function closeConfig() {
 }
 
 function updateConfigStatus() {
-  const gKey   = _cfgGet('spd_groq_key');
   const shUrl  = _cfgGet('spd_shopify_url');
   const shTok  = _cfgGet('spd_shopify_token');
 
-  // Groq status
+  // Groq status — always active (key managed server-side via env var)
   const gDot = document.getElementById('cfg-groq-dot');
   const gLbl = document.getElementById('cfg-groq-lbl');
-  if (gKey) { gDot.style.background = 'var(--green-bright)'; gLbl.textContent = 'configurado'; gLbl.style.color = 'var(--green-bright)'; }
-  else       { gDot.style.background = 'var(--muted)';        gLbl.textContent = 'no configurado'; gLbl.style.color = 'var(--muted)'; }
+  if (gDot) { gDot.style.background = 'var(--green-bright)'; }
+  if (gLbl) { gLbl.textContent = 'gestionado por servidor'; gLbl.style.color = 'var(--green-bright)'; }
 
   // Shopify status
   const sDot = document.getElementById('cfg-shopify-dot');
@@ -6446,14 +6443,13 @@ function updateConfigStatus() {
   if (shUrl && shTok) { sDot.style.background = 'var(--green-bright)'; sLbl.textContent = shUrl; sLbl.style.color = 'var(--green-bright)'; }
   else                { sDot.style.background = 'var(--muted)';        sLbl.textContent = 'no configurado'; sLbl.style.color = 'var(--muted)'; }
 
-  // Update topbar button
+  // Update topbar button — Groq always counts as configured
   const btn = document.getElementById('api-key-btn');
   if (btn) {
-    const allOk = gKey && shUrl && shTok;
-    const partOk = gKey || (shUrl && shTok);
-    btn.style.background = allOk ? 'rgba(52,211,153,0.15)' : partOk ? 'rgba(251,191,36,0.12)' : '';
-    btn.style.color = allOk ? 'var(--green-bright)' : partOk ? 'var(--amber-bright)' : '';
-    btn.textContent = allOk ? '⚙ TODO ACTIVO' : partOk ? '⚙ PARCIAL' : '⚙ CONFIGURAR';
+    const shopifyOk = shUrl && shTok;
+    btn.style.background = shopifyOk ? 'rgba(52,211,153,0.15)' : 'rgba(251,191,36,0.12)';
+    btn.style.color = shopifyOk ? 'var(--green-bright)' : 'var(--amber-bright)';
+    btn.textContent = shopifyOk ? '⚙ TODO ACTIVO' : '⚙ PARCIAL';
   }
 
   // Show/hide shopify button in tools menu
@@ -6479,31 +6475,16 @@ function updateConfigStatus() {
   }
 }
 
-function saveGroqKey() {
-  const val = document.getElementById('cfg-groq-key').value.trim();
-  if (!val) { cfgMsg('cfg-groq-msg', 'Introduce una API key.', 'var(--red-bright)'); return; }
-  _cfgSet('spd_groq_key', val);
-  updateConfigStatus();
-  cfgMsg('cfg-groq-msg', '✓ Guardado. Prueba la conexión para verificar.', 'var(--green-bright)');
-}
-function clearGroqKey() {
-  _cfgDel('spd_groq_key');
-  document.getElementById('cfg-groq-key').value = '';
-  updateConfigStatus();
-  cfgMsg('cfg-groq-msg', 'Clave eliminada.', 'var(--muted)');
-}
 async function testGroq() {
   cfgMsg('cfg-groq-msg', 'Probando...', 'var(--muted)');
-  // Use the field value directly for the test (even if not saved yet)
-  const key = document.getElementById('cfg-groq-key').value.trim() || _cfgGet('spd_groq_key');
   try {
     const res = await fetch('/api/groq', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(key ? { 'x-groq-key': key } : {}) },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role:'user', content:'di "ok"' }], max_tokens: 5 }),
     });
     const d = await res.json();
-    if (d.error === 'no_key') { cfgMsg('cfg-groq-msg', '✗ No hay API key configurada.', 'var(--red-bright)'); return; }
+    if (d.error === 'no_key') { cfgMsg('cfg-groq-msg', '✗ API key no configurada en el servidor.', 'var(--red-bright)'); return; }
     if (d.choices && d.choices[0]) { cfgMsg('cfg-groq-msg', '✓ Conexión OK — Groq LLaMA 3.3 70B activo.', 'var(--green-bright)'); }
     else if (d.error) { cfgMsg('cfg-groq-msg', `✗ Error: ${d.error?.message || JSON.stringify(d.error)}`, 'var(--red-bright)'); }
     else { cfgMsg('cfg-groq-msg', '✗ Respuesta inesperada.', 'var(--red-bright)'); }
