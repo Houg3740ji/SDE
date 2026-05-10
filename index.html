@@ -3226,18 +3226,36 @@ async function attemptLogin() {
   btn.textContent = 'VERIFICANDO...';
   errEl.textContent = '';
 
+  const reset = () => { btn.disabled = false; btn.textContent = 'ENTRAR →'; };
+
   try {
     const hash = await sha256(password);
     const url  = `${AUTH_SUPA_URL}/rest/v1/app_users?username=eq.${encodeURIComponent(username)}&password_hash=eq.${encodeURIComponent(hash)}&select=username,role`;
-    const res  = await fetch(url, {
-      headers: { 'apikey': AUTH_SUPA_KEY, 'Authorization': `Bearer ${AUTH_SUPA_KEY}` }
-    });
+
+    // 8-second timeout so it never hangs forever
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+
+    let res;
+    try {
+      res = await fetch(url, {
+        signal: controller.signal,
+        headers: { 'apikey': AUTH_SUPA_KEY, 'Authorization': `Bearer ${AUTH_SUPA_KEY}` }
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+
+    if (!res.ok) {
+      errEl.textContent = `Error del servidor (${res.status}). Inténtalo de nuevo.`;
+      reset(); return;
+    }
+
     const data = await res.json();
 
     if (!Array.isArray(data) || data.length === 0) {
       errEl.textContent = 'Usuario o contraseña incorrectos.';
-      btn.disabled = false; btn.textContent = 'ENTRAR →';
-      return;
+      reset(); return;
     }
 
     const user = data[0];
@@ -3249,8 +3267,12 @@ async function attemptLogin() {
     document.getElementById('loading-screen').style.display = 'flex';
     boot();
   } catch(e) {
-    errEl.textContent = 'Error de conexión. Inténtalo de nuevo.';
-    btn.disabled = false; btn.textContent = 'ENTRAR →';
+    if (e.name === 'AbortError') {
+      errEl.textContent = 'Tiempo de espera agotado. Comprueba tu conexión.';
+    } else {
+      errEl.textContent = 'Error de conexión. Inténtalo de nuevo.';
+    }
+    reset();
   }
 }
 

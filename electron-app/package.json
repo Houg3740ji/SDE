@@ -1,9 +1,9 @@
 {
   "name": "scuffers-ops-brain",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Scuffers OPS Brain — Panel de operaciones en tiempo real",
   "main": "main.js",
-  "author": "Scuffers",
+  "author": "Scuffers <ops@scuffers.com>",
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
@@ -71,7 +71,9 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Scuffers OPS Brain"
+      "shortcutName": "Scuffers OPS Brain",
+      "artifactName": "Scuffers-OPS-Brain-Setup-${version}.exe",
+      "deleteAppDataOnUninstall": false
     },
     "publish": {
       "provider": "github",
